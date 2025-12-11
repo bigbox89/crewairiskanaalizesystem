@@ -24,14 +24,8 @@ from a2a.types import MessageSendParams, SendMessageRequest, AgentCard
 
 load_dotenv()
 
-DEFAULT_AGENT_URL = os.getenv(
-    "PUBLIC_URL",
-    "https://7f69ee58-fda6-4701-88c8-ec3ea67e4be1-agent-system.ai-agent.inference.cloud.ru",
-)
-DEFAULT_TOKEN = os.getenv(
-    "AGENT_TOKEN",
-    "NzM2MDBkMDAtMTY3Mi00YjZhLWE1MjEtMmRjOTdhMzNhNTUz.1764f1d2e2b9faf97b4e6f03f4c6d263",
-)
+DEFAULT_AGENT_URL = os.getenv("PUBLIC_URL")
+DEFAULT_TOKEN = os.getenv("AGENT_TOKEN")
 
 app = FastAPI(title="Agent UI", version="0.1.0")
 
@@ -197,10 +191,12 @@ async def health() -> Dict[str, str]:
 @app.post("/api/send")
 async def send_message(body: SendPayload) -> Dict[str, Any]:
     try:
-        base_url = (body.base_url or DEFAULT_AGENT_URL).strip()
+        base_url = (body.base_url or DEFAULT_AGENT_URL or "").strip()
         token = (body.token or DEFAULT_TOKEN or "").strip()
         if not base_url:
-            raise ValueError("Agent URL is not configured. Set PUBLIC_URL in .env.")
+            raise ValueError("Agent URL is not configured. Set PUBLIC_URL in .env file.")
+        if not token:
+            raise ValueError("Agent token is not configured. Set AGENT_TOKEN in .env file.")
         base_url = str(httpx.URL(base_url))
         data = await _send_to_agent(base_url, token, body.message)
         extracted = _extract_text_from_a2a_response(data)
@@ -354,7 +350,7 @@ async def root() -> HTMLResponse:
             <button id="clearBtn" style="background:#1c2740; color:#e8f0ff;">Clear</button>
           </div>
         </div>
-        <div class="subtext">Отправка идёт через /api/send с a2a клиентом. URL и токен берутся из .env (или дефолтов в коде).</div>
+        <div class="subtext">Отправка идёт через /api/send с a2a клиентом. URL и токен берутся из .env файла (PUBLIC_URL и AGENT_TOKEN).</div>
       </div>
 
       <script>

@@ -4,20 +4,52 @@
 
 ---
 
-## Быстрый веб-UI для проверки агента
+## Веб-UI для взаимодействия с агентом
 
-Добавлен легкий FastAPI UI, который позволяет вручную отправить запрос агенту по URL (c optional Bearer токеном), не заходя в Telegram.
+Проект включает два варианта веб-интерфейса:
 
-Запуск:
+### 1. React Frontend (Рекомендуется)
+
+Современный React-интерфейс с поддержкой:
+- Чат-интерфейс в стиле Telegram/ChatGPT
+- Отображение рисков с диаграммами (pie charts)
+- Таблицы с данными (сортировка, поиск, пагинация)
+- Превью и скачивание PDF/XML файлов
+- Markdown-форматирование ответов
+- Темная тема
+
+**Запуск через Docker:**
 ```bash
-uvicorn ui_app:app --reload --port 8000
+# Сборка frontend образа
+docker build -t ui-risk-agent:latest .
+
+# Запуск контейнера
+docker run -d --name ui-frontend -p 8080:80 \
+  -e VITE_API_URL=http://127.0.0.1:8010/api/send \
+  ui-risk-agent:latest
 ```
 
-Опциональные переменные окружения:
-- `PUBLIC_URL` — URL агента по умолчанию (подставляется в форму)
-- `AGENT_TOKEN` — Bearer-токен по умолчанию
+Frontend будет доступен на `http://localhost:8080` и автоматически подключится к backend API.
 
-После старта откройте `http://localhost:8000`, введите URL/токен/сообщение и нажмите “Send to agent”.
+### 2. FastAPI Backend
+
+Backend предоставляет REST API для взаимодействия с A2A агентом.
+
+**Запуск:**
+```bash
+uvicorn ui_app:app --host 0.0.0.0 --port 8010 --reload
+```
+
+**Переменные окружения (обязательные):**
+- `PUBLIC_URL` — URL A2A агента (например, `https://your-agent-id-agent-system.ai-agent.inference.cloud.ru`)
+- `AGENT_TOKEN` — Bearer токен для авторизации
+
+**API Endpoints:**
+- `GET /` — простая HTML форма для тестирования
+- `POST /api/send` — отправка сообщения агенту
+- `GET /health` — проверка здоровья сервиса
+
+**Важно:** Все токены и URL должны быть указаны в `.env` файле. Хардкодные значения удалены из кода.
 
 ---
 
@@ -108,14 +140,27 @@ cp .env.example .env
 TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 TELEGRAM_BOT_USERNAME=your_bot_username
 
-# A2A Agent Configuration
-PUBLIC_URL=https://your-agent-id-agent.ai-agent.inference.cloud.ru
+# A2A Agent Configuration (ОБЯЗАТЕЛЬНО для веб-UI)
+PUBLIC_URL=https://your-agent-id-agent-system.ai-agent.inference.cloud.ru
+AGENT_TOKEN=your-agent-bearer-token
+
+# Frontend API URL (для React приложения)
+VITE_API_URL=http://127.0.0.1:8010/api/send
 
 # Optional: Message handling
 HANDLE_MESSAGE_EDITS=true
 HANDLE_MESSAGE_DELETES=false
 EDIT_RESPONSE_TIMEOUT=30
+
+# Optional: OpenTelemetry
+# OTEL_EXPORTER_OTLP_ENDPOINT=https://your-otel-endpoint
+# OTEL_SERVICE_NAME=agent-ui
 ```
+
+**Важно:** 
+- `PUBLIC_URL` и `AGENT_TOKEN` обязательны для работы веб-UI
+- Все токены должны быть указаны в `.env` файле, не в коде
+- Создайте `.env` на основе `.env.example` (если существует) или используйте пример выше
 
 ---
 
@@ -238,12 +283,16 @@ docker-compose logs -f
 
 | Переменная | Описание | Обязательно |
 |-----------|----------|-------------|
-| `TELEGRAM_BOT_TOKEN` | Токен бота от BotFather | Да |
-| `TELEGRAM_BOT_USERNAME` | Юзернейм бота (без `@`) | Да |
+| `TELEGRAM_BOT_TOKEN` | Токен бота от BotFather (для Telegram бота) | Да* |
+| `TELEGRAM_BOT_USERNAME` | Юзернейм бота (без `@`) (для Telegram бота) | Да* |
 | `PUBLIC_URL` | URL A2A агента | Да |
+| `AGENT_TOKEN` | Bearer токен для авторизации в A2A агенте | Да |
+| `VITE_API_URL` | URL backend API для React frontend | Нет (по умолчанию: `http://127.0.0.1:8010/api/send`) |
 | `HANDLE_MESSAGE_EDITS` | Обрабатывать измененные сообщения (по умолчанию: true) | Нет |
 | `HANDLE_MESSAGE_DELETES` | Игнорировать удаленные сообщения (по умолчанию: false) | Нет |
 | `EDIT_RESPONSE_TIMEOUT` | Таймаут для отмены старого запроса в секундах (по умолчанию: 30) | Нет |
+
+*Обязательно только для Telegram бота, не требуется для веб-UI
 
 Опционально можно настраивать переменные для OpenTelemetry (например, `OTEL_EXPORTER_OTLP_ENDPOINT` и др.), если требуется экспорт трейсов. В коде уже используются трейсы (`opentelemetry`), но экспорт по умолчанию не настраивается.
 
@@ -273,8 +322,10 @@ docker-compose logs -f
 ### Нет ответа от агента
 
 1. Убедитесь, что введён корректный URL агента в `PUBLIC_URL`
-2. Проверьте, что агент доступен по сети
-3. Проверьте логи на ошибки подключения
+2. Проверьте, что указан правильный `AGENT_TOKEN` в `.env`
+3. Проверьте, что агент доступен по сети
+4. Проверьте логи на ошибки подключения
+5. **Важно:** Все токены должны быть в `.env` файле, не в коде
 
 ### Ошибки с зависимостями
 
@@ -299,14 +350,28 @@ docker-compose logs -f
 ## Структура проекта
 
 ```
-telegram-bot-for-a2a/
-├── main.py                 # Точка входа бота
-├── Dockerfile              # Docker образ
+crewairiskanaalizesystem/
+├── main.py                 # Точка входа Telegram бота
+├── ui_app.py              # FastAPI backend для веб-UI
+├── Dockerfile              # Docker образ для React frontend
 ├── docker-compose.yaml     # Docker Compose конфигурация
-├── pyproject.toml          # Конфигурация проекта и зависимости (Poetry)
+├── pyproject.toml          # Конфигурация проекта и зависимости
 ├── poetry.lock             # Lock файл зависимостей (Poetry)
-├── .env.example            # Пример конфигурации
+├── uv.lock                 # Lock файл зависимостей (uv)
+├── .env.example            # Пример конфигурации (создайте .env на его основе)
+├── .dockerignore           # Исключения для Docker build
 ├── README.md              # Документация
+├── frontend/               # React frontend приложение
+│  ├── src/
+│  │  ├── App.tsx          # Главный компонент
+│  │  ├── components/      # React компоненты (ChatMessage, DataTable, RiskChart)
+│  │  ├── lib/             # Утилиты (parser.ts)
+│  │  └── types.ts         # TypeScript типы
+│  ├── package.json        # Frontend зависимости
+│  └── vite.config.ts      # Vite конфигурация
+├── config/
+│  ├── nginx.conf          # Nginx конфигурация для frontend
+│  └── config.py           # Конфигурация через pydantic-settings
 └── src/
    ├── config/
    │  ├── __init__.py
@@ -351,13 +416,24 @@ poetry run python main.py
 
 ### Технологии
 
-- **Python 3.13**
+**Backend:**
+- **Python 3.12+**
+- **FastAPI** (веб-фреймворк для API)
 - **aiogram 3** (Telegram Bot API)
-- **Poetry** (управление зависимостями)
-- **pydantic-settings** (конфигурация через `.env`)
+- **uvicorn** (ASGI сервер)
 - **httpx** (HTTP-клиент)
-- **a2a** (интеграция с агентами)
+- **a2a** (интеграция с A2A агентами)
+- **pydantic-settings** (конфигурация через `.env`)
 - **opentelemetry** (встроенные трейсы в коде; экспорт при наличии конфигурации)
+
+**Frontend:**
+- **React 18** (TypeScript)
+- **Vite** (сборщик)
+- **Tailwind CSS** (стилизация)
+- **Chart.js** (диаграммы рисков)
+- **react-table** (таблицы с данными)
+- **react-markdown** (форматирование ответов)
+- **react-pdf** (просмотр PDF)
 
 Полезные ссылки:
 - [Документация aiogram](https://docs.aiogram.dev)
