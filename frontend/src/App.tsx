@@ -31,7 +31,7 @@ const App: React.FC = () => {
     setError(null);
     const timestamp = new Date().toLocaleString();
     const userEntry: ChatEntry = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: 'user',
       timestamp,
       parsed: {
@@ -92,7 +92,7 @@ const App: React.FC = () => {
 
     const parsed = parseAgentResponse(responseData.data ?? responseData);
     const agentEntry: ChatEntry = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role: 'agent',
       timestamp: new Date().toLocaleString(),
       parsed,
