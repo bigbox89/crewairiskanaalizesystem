@@ -8,6 +8,7 @@
 
 - [Описание системы](#описание-системы)
 - [URL (агенты и MCP)](#url-агенты-и-mcp)
+- [Подключенные API](#подключенные-api)
 - [Как развернуть в Cloud.ru (админам)](#как-развернуть-в-cloudru-админам)
 - [Сервисы в Cloud.ru (MCP-серверы)](#сервисы-в-cloudru-mcp-серверы)
   - [mcp-server-fns](#mcp-server-fns)
@@ -53,6 +54,36 @@
 | MCP server | mcp-server-kad-arbitr | https://67e0acea-15bf-4034-9cd6-5f4940ff97e9-mcp-server.ai-agent.inference.cloud.ru/mcp |
 | MCP server | mcp-server-fns | https://dc41f1b0-0a90-4834-90e1-7269d92aa1e4-mcp-server.ai-agent.inference.cloud.ru/mcp |
 | MCP server | mcp-server-bank-statement | https://df98ce3e-e263-4c9a-a73e-d3527e5a4124-mcp-server.ai-agent.inference.cloud.ru/mcp |
+
+---
+
+## Подключенные API
+
+Ниже перечислены внешние API/источники данных, к которым обращаются MCP-сервисы (напрямую или через прокси), и ссылки на их документацию.
+
+### ФНС / ЕГРЮЛ / ЕГРИП (через API-ФНС)
+
+- **Документация**: [api-fns.ru — описание API](https://api-fns.ru/api_help)
+- **Что даёт**: интеграция данных ФНС (ЕГРЮЛ/ЕГРИП), поиск/проверки, выписки, бухотчётность, статусы физлиц; ответы в формате JSON.  
+  Единая точка входа (по документации): `https://api-fns.ru/api`.
+- **Где используется**: MCP `mcp-server-fns` (папка `fns-tax-mcp/`).
+
+### Арбитраж (kad.arbitr.ru) через api-assist.com
+
+- **Источник карточек дел**: `https://kad.arbitr.ru/`
+- **Документация API прокси**: `https://api-assist.com/documentation/arbitr-api.txt`
+- **Где используется**: MCP `mcp-server-kad-arbitr` (папка `kadarbitrmcp/`) — инструменты `arbitr_search_cases`, `arbitr_details_by_number`, `arbitr_details_by_id`, `arbitr_download_pdf`.
+
+### Банки (выписки по расчётному счёту)
+
+- **Модульбанк API**: `https://api.modulbank.ru/`
+- **T‑Bank (developer docs)**: `https://developer.tbank.ru/docs/intro/integration-steps`
+- **Альфа-Банк (manual)**: `https://partner.alfabank.ru/files/download?code=api-manual`
+- **Где используется**: MCP `mcp-server-bank-statement` (папка `bank-statement-mcp/`) — инструмент `get_bank_statement`.
+
+### Документы / презентации
+
+- `AI-RISK-OFFICER-2025-Intellektualnaya-sistema-ocenki-riskov-kontragentov.pdf` — презентация системы (agent-system + агенты + MCP).
 
 ---
 
