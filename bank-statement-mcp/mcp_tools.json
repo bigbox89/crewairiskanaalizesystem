@@ -1,0 +1,44 @@
+{
+  "tools": [
+    {
+      "name": "get_bank_statement",
+      "description": "Получить выписку операций по расчётному счёту за период. Поддерживает T‑Bank, Модульбанк, Альфа-Банк. Пользователь заполняет BANK_PROVIDER и соответствующий *_TOKEN в настройках MCP.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "from_date": {
+            "type": "string",
+            "description": "Дата начала в формате YYYY-MM-DD"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "Дата конца в формате YYYY-MM-DD"
+          },
+          "account_id": {
+            "type": "string",
+            "description": "ID счёта (обязательно для Модульбанка)"
+          },
+          "bank_provider": {
+            "type": "string",
+            "description": "Банк: tbank | modulbank | alfa (приоритет над BANK_PROVIDER)"
+          }
+        },
+        "required": ["from_date", "to_date"]
+      },
+      "meta": {
+        "env": [
+          "BANK_PROVIDER",
+          "MODE",
+          "T_BANK_TOKEN",
+          "T_BANK_SANDBOX_TOKEN",
+          "MODULBANK_TOKEN",
+          "MODULBANK_SANDBOX_CLIENT_ID",
+          "MODULBANK_SANDBOX_CLIENT_SECRET",
+          "MODULBANK_SANDBOX_TOKEN",
+          "ALFA_TOKEN"
+        ]
+      }
+    }
+  ]
+}
+

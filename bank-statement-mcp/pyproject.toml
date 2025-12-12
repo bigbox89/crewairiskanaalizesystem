@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bank-statement-mcp"
+version = "1.0.0"
+description = "Универсальный MCP-сервер для получения банковских выписок из Тинькофф, СберБизнес, Модульбанк, Альфа-Банк"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # CHANGE: Обновление fastmcp до версии 2.0+ для поддержки streamable-http и custom_route
+    # WHY: FastMCP 2.0 поддерживает mcp.run(transport="streamable-http") и @mcp.custom_route()
+    # QUOTE(TЗ): "Обновление FastMCP до 2.0 и исправление API вызовов"
+    # REF: План обновления FastMCP до 2.0
+    "fastmcp>=2.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+    "opentelemetry-api>=1.21.0",
+    "opentelemetry-sdk>=1.21.0",
+    "opentelemetry-instrumentation-httpx>=0.42b0",
+    "opentelemetry-exporter-otlp-proto-http>=1.21.0",
+    "uvicorn>=0.24.0",
+    "python-dotenv>=1.0.1",
+    # CHANGE: Пин вебсокетов чтобы исключить устаревший legacy-модуль
+    # WHY: Устранение DeprecationWarning из websockets.legacy
+    # REF: container logs с предупреждениями websockets.legacy
+    "websockets<14.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-mock>=3.11.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "pyyaml>=6.0.0",
+    "uvicorn>=0.24.0",
+]
+
+[tool.setuptools]
+packages = ["tools"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+

@@ -1,0 +1,58 @@
+{
+  "rawEnvs": {
+    "BANK_PROVIDER": {
+      "isRequired": true,
+      "description": "Банк: tbank | modulbank | alfa"
+    },
+    "MODE": {
+      "isRequired": false,
+      "description": "Режим работы: prod | test",
+      "defaultValue": "test"
+    },
+    "MODULBANK_SANDBOX_CLIENT_ID": {
+      "isRequired": false,
+      "description": "Sandbox clientId (по умолчанию sandboxapp)",
+      "defaultValue": "sandboxapp"
+    },
+    "MODULBANK_SANDBOX_CLIENT_SECRET": {
+      "isRequired": false,
+      "description": "Sandbox clientSecret (по умолчанию sandboxappsecret)",
+      "defaultValue": "sandboxappsecret"
+    },
+    "MODULBANK_SANDBOX_TOKEN": {
+      "isRequired": false,
+      "description": "Sandbox токен Модульбанка (по умолчанию sandboxtoken)",
+      "defaultValue": "sandboxtoken"
+    },
+    "T_BANK_SANDBOX_TOKEN": {
+      "isRequired": false,
+      "description": "Sandbox токен T-Bank (по умолчанию TBankSandboxToken)",
+      "defaultValue": "TBankSandboxToken"
+    },
+    "HOST": {
+      "isRequired": false,
+      "description": "Адрес прослушивания HTTP сервера",
+      "defaultValue": "0.0.0.0"
+    },
+    "PORT": {
+      "isRequired": false,
+      "description": "Порт HTTP сервера",
+      "defaultValue": "8080"
+    }
+  },
+  "secretEnvs": {
+    "T_BANK_TOKEN": {
+      "isRequired": false,
+      "description": "Токен T‑Bank (бывш. Тинькофф Бизнес) из ЛК → Интеграции → API"
+    },
+    "MODULBANK_TOKEN": {
+      "isRequired": false,
+      "description": "Bearer-токен из Модульбанка"
+    },
+    "ALFA_TOKEN": {
+      "isRequired": false,
+      "description": "API-ключ из Альфа-Бизнес Онлайн"
+    }
+  }
+}
+

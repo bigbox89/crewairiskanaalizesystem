@@ -1,0 +1,51 @@
+{
+  "health": {
+    "status": "ok",
+    "response": {
+      "status": "ok",
+      "service": "fns-tax-mcp"
+    }
+  },
+  "root": {
+    "status": "ok",
+    "response": {
+      "service": "fns-tax-mcp",
+      "description": "MCP-сервер для генерации деклараций и работы с API-ФНС (24 tools)",
+      "tools": [
+        "generate_usn_declaration",
+        "generate_osno_declaration",
+        "generate_nds_declaration",
+        "generate_6ndfl_declaration",
+        "search_companies",
+        "autocomplete",
+        "get_company_data",
+        "multinfo_companies",
+        "multcheck_companies",
+        "check_counterparty",
+        "check_account_blocks",
+        "check_account_blocks_file",
+        "track_changes",
+        "monitor_companies",
+        "get_extract",
+        "get_msp_extract",
+        "get_accounting_report",
+        "get_accounting_report_file",
+        "get_inn_by_passport",
+        "check_passport",
+        "check_passport_info",
+        "check_person_status",
+        "get_fsrar_licenses",
+        "get_api_statistics"
+      ]
+    }
+  },
+  "list_tools": {
+    "status": "error",
+    "error": "Client error '400 Bad Request' for url 'https://b850adf3-acab-4d34-bd4f-9ed81f408203-mcp-server.ai-agent.inference.cloud.ru/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+  },
+  "tool_call": {
+    "status": "error",
+    "tool": "generate_usn_declaration",
+    "error": "Client error '400 Bad Request' for url 'https://b850adf3-acab-4d34-bd4f-9ed81f408203-mcp-server.ai-agent.inference.cloud.ru/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+  }
+}

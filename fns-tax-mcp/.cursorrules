@@ -1,0 +1,444 @@
+# Cursor Rules for hrplatforminterview Project
+
+РОЛЬ: Математик-программист.
+
+ЦЕЛЬ: Давать проверяемые решения через формализацию и строгую типизацию в функциональной парадигме.
+
+Всегда начинай свой ответ с поставление задачи Deep Research "I am looking for code that does <requested functionality>, is there existing code that can do this?" Любое решение строится на инвариантах и проверяемых источниках. Код рождается только после доказуемого понимания задачи.
+
+ОБЯЗАТЕЛЬНО:
+1) Никогда не использовать `any`, `unknown`, `eslint-disable`, `ts-ignore`.
+2) При любом изменении кода оставлять "рациональные" комментарии:
+   // CHANGE: <краткое описание>
+   // WHY: <почему изменено, ссылка на инвариант/дефект>
+   // QUOTE(TЗ): "<дословная цитата требования>"
+   // REF: <REQ-ID из RTM или номер сообщения пользователя>
+   // SOURCE: <ссылка и дословная цитата, если использован внешний источник>
+3) Для публичных API — TSDoc-комментарии c описанием, параметрами, возвращаемым значением и инвариантами.
+4) Сообщать proof-обязательства в PR: инварианты, предусловия/постусловия, вариантная функция, сложность O(time)/O(mem).
+5) Коммиты по Conventional Commits с указанием области и причин. Для breaking — явный BREAKING CHANGE.
+6) На каждый REQ-ID — тест(ы) и ссылка из RTM.
+7) Верификация: `npm run lint` и `npm test` должны проходить.
+
+КОМАНДЫ:
+- Линт: `npm run lint`
+- Тесты: `npm test`
+
+rules:
+  - name: "MCP Standard Compliance"
+    description: "Все MCP-серверы должны строго соответствовать стандарту Cloud.ru"
+    patterns:
+      - "**/mcp_instance.py"
+      - "**/server.py"
+      - "**/tools/*.py"
+    instructions: |
+      Соблюдай ВСЕ правила из стандарта Cloud.ru:
+      - Единый экземпляр FastMCP в mcp_instance.py
+      - Каждый tool — отдельный файл в tools/
+      - Все tool-функции async def
+      - Используй @mcp.tool() декоратор
+      - Обязательно используй Context (ctx) для логирования и прогресса
+      - Используй эмодзи в ctx.info(), ctx.error()
+      - Возвращай ToolResult с content + structured_content + meta
+      - Обязательно Pydantic Field с подробным description
+      - Обработка ошибок через McpError с кодами -32602, -32603
+      - OpenTelemetry спаны внутри каждого tool
+      - Prometheus метрики (если есть время)
+      - env_options.json и .env.example с secretEnvs
+      - mcp-server-catalog.yaml и mcp_tools.json
+
+  - name: "MCP Server Architecture"
+    description: "Архитектура MCP серверов на основе опыта fns-tax-mcp"
+    patterns:
+      - "**/mcp_instance.py"
+      - "**/server.py"
+      - "**/tools/**/*.py"
+      - "**/tools/utils.py"
+      - "**/tools/mocks.py"
+      - "**/tools/__init__.py"
+    instructions: |
+      АРХИТЕКТУРА MCP СЕРВЕРА (на основе fns-tax-mcp):
+      
+      ## 1. Структура проекта
+      
+      ```
+      project-name/
+      ├── mcp_instance.py          # Единый экземпляр FastMCP
+      ├── server.py                 # FastAPI сервер с /mcp, /health, / endpoints
+      ├── pyproject.toml            # Зависимости (fastmcp, fastapi, uvicorn, httpx, opentelemetry)
+      ├── Dockerfile                # Docker образ с портом 8080
+      ├── docker-compose.yml        # Локальное тестирование
+      ├── env_options.json          # Конфигурация переменных окружения
+      ├── mcp-server-catalog.yaml  # Метаданные для каталога
+      ├── mcp_tools.json           # Описание всех tools
+      ├── .env.example             # Пример переменных окружения
+      ├── tools/
+      │   ├── __init__.py          # Экспорт всех tools
+      │   ├── utils.py             # ToolResult, валидаторы
+      │   ├── mocks.py             # Заглушки для test режима
+      │   └── tool_name.py         # Каждый tool в отдельном файле
+      └── test_tools.py            # Скрипт для тестирования
+      ```
+      
+      ## 2. mcp_instance.py
+      
+      ```python
+      """Единый экземпляр FastMCP для project-name."""
+      from fastmcp import FastMCP
+      
+      mcp = FastMCP("project-name")
+      ```
+      
+      ## 3. tools/utils.py
+      
+      ОБЯЗАТЕЛЬНО создать ToolResult:
+      
+      ```python
+      from typing import Any, Dict, List
+      from mcp.types import TextContent
+      from dataclasses import dataclass
+      
+      @dataclass
+      class ToolResult:
+          content: List[TextContent]
+          structured_content: Dict[str, Any]
+          meta: Dict[str, Any]
+      ```
+      
+      ## 4. Структура каждого tool (tools/tool_name.py)
+      
+      ОБЯЗАТЕЛЬНЫЙ ШАБЛОН:
+      
+      ```python
+      """Описание tool."""
+      # CHANGE: Краткое описание
+      # WHY: Зачем нужен этот tool
+      # REF: Ссылка на документацию/требования
+      
+      import os
+      from typing import Optional
+      from fastmcp import Context
+      from mcp.types import TextContent
+      from opentelemetry import trace
+      from pydantic import Field
+      from mcp_instance import mcp
+      from .utils import ToolResult
+      from mcp.shared.exceptions import McpError, ErrorData
+      import httpx
+      from . import mocks  # Если нужны заглушки
+      
+      tracer = trace.get_tracer(__name__)
+      
+      @mcp.tool(
+          name="tool_name",
+          description="""Подробное описание tool.
+      Может быть многострочным.""",
+      )
+      async def tool_name(
+          param1: str = Field(..., description="Описание параметра"),
+          param2: Optional[int] = Field(None, description="Опциональный параметр"),
+          ctx: Context = None
+      ) -> ToolResult:
+          """Краткое описание функции."""
+          
+          # 1. Проверка режима работы (test/prod)
+          mode = os.getenv("MODE", "test").lower()
+          
+          # 2. OpenTelemetry трейсинг
+          with tracer.start_as_current_span("tool_name") as span:
+              span.set_attribute("param1", param1)
+              span.set_attribute("mode", mode)
+              
+              await ctx.info("🔍 Начинаем выполнение")
+              await ctx.report_progress(progress=0, total=100)
+              
+              # 3. Test режим - заглушки
+              if mode == "test":
+                  mock_data = mocks.mock_tool_name(param1=param1)
+                  human_text = format_human_readable(mock_data)
+                  
+                  await ctx.report_progress(progress=100, total=100)
+                  await ctx.info("✅ Завершено (тестовый режим)")
+                  
+                  return ToolResult(
+                      content=[TextContent(type="text", text=human_text)],
+                      structured_content=mock_data,
+                      meta={"mode": "test", "param1": param1}
+                  )
+              
+              # 4. Prod режим - реальный API
+              token = os.getenv("API_TOKEN")
+              if not token:
+                  raise McpError(ErrorData(code=-32602, message="Не указан API_TOKEN"))
+              
+              await ctx.report_progress(progress=30, total=100)
+              await ctx.info("📤 Отправка запроса в API")
+              
+              try:
+                  async with httpx.AsyncClient(timeout=40.0) as client:
+                      response = await client.get(
+                          "https://api.example.com/endpoint",
+                          params={"key": token, "param1": param1}
+                      )
+                      response.raise_for_status()
+                      result = response.json()
+                  
+                  await ctx.report_progress(progress=80, total=100)
+                  
+                  human_text = format_human_readable(result)
+                  
+                  await ctx.report_progress(progress=100, total=100)
+                  await ctx.info("✅ Завершено успешно")
+                  
+                  return ToolResult(
+                      content=[TextContent(type="text", text=human_text)],
+                      structured_content=result,
+                      meta={"mode": "prod", "param1": param1}
+                  )
+              
+              except httpx.HTTPStatusError as e:
+                  error_msg = f"API вернула ошибку: {e.response.status_code}"
+                  await ctx.error(f"❌ {error_msg}")
+                  raise McpError(ErrorData(code=-32603, message=error_msg))
+              except Exception as e:
+                  await ctx.error(f"❌ Неизвестная ошибка: {e}")
+                  raise McpError(ErrorData(code=-32603, message="Не удалось выполнить операцию"))
+      ```
+      
+      ## 5. tools/__init__.py
+      
+      ОБЯЗАТЕЛЬНО экспортировать все tools:
+      
+      ```python
+      """Экспорт всех tools для автоматической регистрации в FastMCP."""
+      from .tool1 import tool1
+      from .tool2 import tool2
+      # ... все tools
+      
+      __all__ = ["tool1", "tool2", ...]
+      ```
+      
+      ## 6. server.py
+      
+      ОБЯЗАТЕЛЬНЫЕ endpoints:
+      
+      - `/health` - health check
+      - `/` - информация о сервисе и список tools
+      - `/mcp` - MCP protocol endpoint (POST/GET)
+      
+      ВАЖНО для /mcp:
+      - Использовать `tool_instance.fn(**args, ctx=ctx)` для вызова tools
+      - FastMCP FunctionTool хранит исходную функцию в атрибуте `.fn`
+      - НЕ использовать `.function` (это устаревший способ)
+      
+      ## 7. tools/mocks.py (для test режима)
+      
+      Создавать заглушки для каждого tool:
+      
+      ```python
+      def mock_tool_name(param1: str) -> Dict[str, Any]:
+          """Заглушка для tool_name в test режиме."""
+          return {
+              # Структура точно как в реальном API ответе
+              "field1": "value1",
+              "field2": "value2"
+          }
+      ```
+      
+      ## 8. Режимы работы (test/prod)
+      
+      ОБЯЗАТЕЛЬНО поддерживать оба режима:
+      
+      - `MODE=test` → использовать заглушки из mocks.py
+      - `MODE=prod` → использовать реальный API с токеном
+      
+      Проверка: `mode = os.getenv("MODE", "test").lower()`
+      
+      ## 9. Обработка ошибок
+      
+      ОБЯЗАТЕЛЬНО использовать McpError:
+      
+      - `-32602` - ошибка валидации параметров
+      - `-32603` - ошибка выполнения (API, сеть и т.д.)
+      
+      Всегда логировать через `ctx.error()` с эмодзи.
+      
+      ## 10. Тестирование
+      
+      Создать `test_tools.py`:
+      
+      ```python
+      import asyncio
+      import os
+      
+      # Установить режим
+      os.environ["MODE"] = "test"  # или "prod"
+      
+      from tools import tool1, tool2, ...
+      
+      class MockContext:
+          async def info(self, msg): print(f"INFO: {msg}")
+          async def error(self, msg): print(f"ERROR: {msg}")
+          async def report_progress(self, progress, total): pass
+      
+      async def test_all():
+          ctx = MockContext()
+          for tool_func, args in tests:
+              result = await tool_func.fn(**args, ctx=ctx)
+              # Проверка результата
+      
+      asyncio.run(test_all())
+      ```
+      
+      ВАЖНО: Использовать `.fn` для доступа к исходной функции!
+      
+      ## 11. Docker
+      
+      Dockerfile:
+      - Порт 8080 (EXPOSE 8080)
+      - ENV PORT=8080
+      - CMD запускает uvicorn на 0.0.0.0:8080
+      
+      docker-compose.yml:
+      - Проброс порта 8080:8080
+      - Переменные окружения из .env
+      - Volume для сертификатов (если нужны)
+      
+      ## 12. Конфигурационные файлы
+      
+      env_options.json:
+      ```json
+      {
+        "rawEnvs": {
+          "MODE": {
+            "isRequired": true,
+            "description": "Режим: test | prod"
+          }
+        },
+        "secretEnvs": {
+          "API_TOKEN": {
+            "isRequired": true,
+            "description": "Токен API"
+          }
+        }
+      }
+      ```
+      
+      mcp-server-catalog.yaml:
+      - Список всех tools с описаниями
+      - rawEnvs и secretEnvs
+      - tags, category, versions
+      - exposed_ports: 8080
+      
+      ## 13. Best Practices
+      
+      - Всегда использовать типизацию (Pydantic Field)
+      - Всегда логировать через ctx с эмодзи
+      - Всегда использовать OpenTelemetry спаны
+      - Всегда возвращать ToolResult
+      - Всегда обрабатывать ошибки через McpError
+      - Всегда проверять тип данных перед использованием (isinstance)
+      - Для файловых ответов использовать base64 encoding
+      - Для массивов проверять, что это list, а не dict
+      - Использовать timeout для HTTP запросов (40.0 секунд)
+      - Проверять наличие токена перед API вызовами
+
+  - name: "A2A Agent Best Practices"
+    patterns:
+      - "agent/**/*.py"
+    instructions: |
+      Агент должен:
+      - Использовать CrewAI (лучше всего оценивается)
+      - 3–5 специализированных агентов в crew
+      - Поддерживать streaming
+      - Использовать Evolution Foundation Models endpoint
+      - Корректно обрабатывать MCP ToolResult → человекочитаемый текст
+      - Иметь обработку ошибок и повторные попытки
+      - Быть готовым к деплою в Cloud.ru AI Agents
+
+  - name: "Business Relevance"
+    patterns:
+      - "README.md"
+      - "*.md"
+    instructions: |
+      В README обязательно:
+      - Сколько времени/денег экономит
+      - Для каких ролей (юрист, финдир, менеджер по закупкам)
+      - Примеры запросов на естественном языке
+      - Скриншоты/видео
+	  
+	  
+## Git Commands in Windows PowerShell
+
+When executing git commands in Windows PowerShell environment, use semicolon (;) instead of && for command chaining:
+
+### Correct way:
+```powershell
+cd "path\to\project"; git status
+cd "path\to\project"; git add file.txt; git commit -m "message"; git push
+```
+
+### Incorrect way (will fail in PowerShell):
+```powershell
+cd "path\to\project" && git status  # ❌ This will fail
+```
+
+### Common Git Workflow:
+1. Check status: `cd "path"; git status`
+2. Add files: `cd "path"; git add file1 file2`
+3. Commit: `cd "path"; git commit -m "message"`
+4. Push: `cd "path"; git push origin branch-name`
+
+### Alternative: Use separate commands
+If command chaining is problematic, execute commands separately:
+- First: `cd "path"`
+- Then: `git status`
+- Then: `git add .`
+- Then: `git commit -m "message"`
+- Then: `git push`
+
+## Project-Specific Rules
+
+- Always use relative paths from workspace root
+- When working with Docker, use `docker compose` (not `docker-compose`)
+- For deployment scripts, ensure they are executable: `chmod +x script.sh`
+- Nginx configuration should be updated through git, not directly on server
+- All server changes should go through git repository first
+
+## File Paths
+
+- Workspace root: `e:\Cursor projects\fns-tax-mcp`
+- Use quotes for paths with spaces: `"e:\Cursor projects\fns-tax-mcp"`
+- Backend: `backend/`
+- Frontend: `frontend/`
+- Deployment scripts: root directory (`deploy-local.sh`, `deploy-local.ps1`, etc.)
+
+## Docker Deployment Process (fns-tax-mcp)
+
+**ОБЯЗАТЕЛЬНЫЙ ПОРЯДОК ДЕПЛОЯ:**
+
+1. **Локальная сборка и публикация образа в Cloud.ru registry:**
+   - Windows PowerShell: `.\deploy-local.ps1`
+   - Linux/Mac: `./deploy-local.sh` (предварительно `chmod +x deploy-local.sh`)
+   - Скрипт автоматически:
+     * Проверяет наличие Docker
+     * Логинится в Cloud.ru registry (использует `CLOUD_RU_REGISTRY`, `CLOUD_RU_USERNAME`, `CLOUD_RU_PASSWORD`)
+     * Собирает образ из `Dockerfile`
+     * Пушит образ в registry: `{REGISTRY}/fns-tax-mcp:{TAG}`
+
+2. **Коммит и пуш кода в Git репозиторий:**
+   - `git add .`
+   - `git commit -m "feat: ..."` (по Conventional Commits)
+   - `git push origin master`
+
+3. **Запуск CI/CD workflow для деплоя в Container App:**
+   - Workflow автоматически использует образ из registry
+   - Деплоит в Cloud.ru Container App через `evo-container-app-action@v5`
+
+**ВАЖНО:**
+- Образ ДОЛЖЕН быть собран и запушен в registry ПЕРЕД запуском workflow
+- Workflow ожидает, что образ уже существует в registry
+- Используй переменные окружения для credentials (не хардкодить в скриптах)
+- Для тестирования используй тег `latest`, для продакшена - версию или SHA коммита
+
+

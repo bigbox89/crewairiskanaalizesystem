@@ -1,0 +1,99 @@
+# Workflow: deploy fns-tax-mcp to Cloud.ru Container App
+# CHANGE: Добавлен CI/CD для сборки образа и деплоя в Container App Cloud.ru
+# WHY: Требование пользователя – автоматический деплой на контейнерную платформу Cloud.ru
+# QUOTE(TЗ): "настрой файл для деплоя ... cloud-ru.yaml"
+# REF: Пользовательский запрос
+#
+# ВАЖНО: Процесс деплоя (по правилам проекта):
+# 1. Локальная сборка и публикация образа в registry (рекомендуется):
+#    - Windows: .\deploy-local.ps1
+#    - Linux/Mac: ./deploy-local.sh
+# 2. Коммит и пуш кода в Git репозиторий
+# 3. Запуск этого workflow для деплоя в Container App
+#
+# Альтернативно: workflow может собрать образ сам (если не собран локально)
+name: Deploy to Cloud.ru Container App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ${{ secrets.CLOUD_RU_REGISTRY }}
+  IMAGE_NAME: fns-tax-mcp
+  IMAGE_TAG: container_app-${{ github.sha }}  # Добавлен SHA для версии
+  APP_NAME: container-app-gitverse-hello
+  APP_PORT: 8080
+
+jobs:
+  build-push-image:
+    name: Сборка и публикация Docker-образа
+    runs-on: self-hosted  # Используем метку self-hosted:host для выполнения на хосте
+    # CHANGE: Используем метку self-hosted:host для выполнения задачи на хосте с доступом к Docker
+    # WHY: Runner имеет метку self-hosted:host, что означает выполнение на хосте, где Docker доступен
+    # REF: Конфигурация runner показывает self-hosted:host, Docker доступен на хосте (28.2.2)
+    # NOTE: Если образ уже собран локально и запушен в registry, этот job можно пропустить
+
+    steps:
+      - name: Клонировать репозиторий
+        uses: actions/checkout@v4
+
+      - name: Установить Docker CLI (если нужно)
+        run: |
+          if ! command -v docker >/dev/null 2>&1; then
+            echo "Docker CLI not found, installing..."
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sh get-docker.sh
+          fi
+          # Проверяем доступ к Docker socket
+          if [ -S /var/run/docker.sock ]; then
+            echo "Docker socket found at /var/run/docker.sock"
+            ls -la /var/run/docker.sock
+          else
+            echo "WARNING: Docker socket not found at /var/run/docker.sock"
+            echo "Trying to find Docker socket..."
+            find /var/run -name "docker.sock" 2>/dev/null || echo "Docker socket not found"
+          fi
+
+      - name: Проверить Docker
+        run: |
+          docker info || echo "Docker daemon not accessible"
+          docker buildx ls || echo "Buildx not available"
+
+      - name: Вход в реестр cloud.ru
+        run: |
+          echo "${{ secrets.CLOUD_RU_PASSWORD }}" | docker login ${{ env.REGISTRY }} \
+            -u ${{ secrets.CLOUD_RU_USERNAME }} --password-stdin
+
+      - name: Сборка и публикация образа
+        run: |
+          docker buildx build . \
+            -f Dockerfile \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+            --build-arg PORT=${{ env.APP_PORT }} \
+            --push \
+            --provenance false
+
+  up-container-app:
+    name: Деплой в Container App
+    needs: build-push-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Установить Go (>=1.23)
+        uses: actions/setup-go@v4
+        with:
+          go-version: ">=1.23"
+
+      - name: Создать или обновить приложение в Container App
+        uses: ara-bakiev997/evo-container-app-action@v5
+        with:
+          client_id: ${{ secrets.CLOUD_RU_USERNAME }}
+          client_secret: ${{ secrets.CLOUD_RU_PASSWORD }}
+          registry_uri: ${{ env.REGISTRY }}
+          image_name: ${{ env.IMAGE_NAME }}
+          tag_name: ${{ env.IMAGE_TAG }}  # Теперь с SHA
+          project_id: ${{ secrets.CLOUD_RU_PROJECT_ID }}
+          name: ${{ env.APP_NAME }}
+          port: ${{ env.APP_PORT }}

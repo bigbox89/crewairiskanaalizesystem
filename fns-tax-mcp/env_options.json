@@ -1,0 +1,28 @@
+{
+  "rawEnvs": {
+    "FNS_MODE": {
+      "isRequired": true,
+      "description": "Режим работы: test | free | prod (free ограничивает методы)",
+      "defaultValue": "test"
+    }
+  },
+  "secretEnvs": {
+    "FNS_API_TOKEN": {
+      "isRequired": true,
+      "description": "Токен от api-fns.ru (регистрация за 1 минуту)"
+    },
+    "FNS_PROD_TOKEN": {
+      "isRequired": false,
+      "description": "Токен от nalog.gov.ru для реальной отправки"
+    },
+    "FNS_CERT_PATH": {
+      "isRequired": false,
+      "description": "Путь к файлу КЭП .p12 внутри контейнера (например: /certs/cert.p12)"
+    },
+    "FNS_CERT_PASSWORD": {
+      "isRequired": false,
+      "description": "Пароль от КЭП"
+    }
+  }
+}
+

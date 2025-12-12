@@ -1,0 +1,168 @@
+{
+  "health": {
+    "status": "ok",
+    "response": {
+      "status": "ok",
+      "service": "fns-tax-mcp"
+    }
+  },
+  "root": {
+    "status": "ok",
+    "response": {
+      "service": "fns-tax-mcp",
+      "description": "MCP-сервер для генерации деклараций и работы с API-ФНС (24 tools)",
+      "tools": [
+        "generate_usn_declaration",
+        "generate_osno_declaration",
+        "generate_nds_declaration",
+        "generate_6ndfl_declaration",
+        "search_companies",
+        "autocomplete",
+        "get_company_data",
+        "multinfo_companies",
+        "multcheck_companies",
+        "check_counterparty",
+        "check_account_blocks",
+        "check_account_blocks_file",
+        "track_changes",
+        "monitor_companies",
+        "get_extract",
+        "get_msp_extract",
+        "get_accounting_report",
+        "get_accounting_report_file",
+        "get_inn_by_passport",
+        "check_passport",
+        "check_passport_info",
+        "check_person_status",
+        "get_fsrar_licenses",
+        "get_api_statistics"
+      ]
+    }
+  },
+  "list_tools": {
+    "status": "error",
+    "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+  },
+  "tools": {
+    "generate_usn_declaration": {
+      "status": "http_error",
+      "tool": "generate_usn_declaration",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "generate_osno_declaration": {
+      "status": "http_error",
+      "tool": "generate_osno_declaration",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "generate_nds_declaration": {
+      "status": "http_error",
+      "tool": "generate_nds_declaration",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "generate_6ndfl_declaration": {
+      "status": "http_error",
+      "tool": "generate_6ndfl_declaration",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "search_companies": {
+      "status": "http_error",
+      "tool": "search_companies",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "autocomplete": {
+      "status": "http_error",
+      "tool": "autocomplete",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_company_data": {
+      "status": "http_error",
+      "tool": "get_company_data",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "multinfo_companies": {
+      "status": "http_error",
+      "tool": "multinfo_companies",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "multcheck_companies": {
+      "status": "http_error",
+      "tool": "multcheck_companies",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_counterparty": {
+      "status": "http_error",
+      "tool": "check_counterparty",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_account_blocks": {
+      "status": "http_error",
+      "tool": "check_account_blocks",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_account_blocks_file": {
+      "status": "http_error",
+      "tool": "check_account_blocks_file",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "track_changes": {
+      "status": "http_error",
+      "tool": "track_changes",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "monitor_companies": {
+      "status": "http_error",
+      "tool": "monitor_companies",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_extract": {
+      "status": "http_error",
+      "tool": "get_extract",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_msp_extract": {
+      "status": "http_error",
+      "tool": "get_msp_extract",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_accounting_report": {
+      "status": "http_error",
+      "tool": "get_accounting_report",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_accounting_report_file": {
+      "status": "http_error",
+      "tool": "get_accounting_report_file",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_inn_by_passport": {
+      "status": "http_error",
+      "tool": "get_inn_by_passport",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_passport": {
+      "status": "http_error",
+      "tool": "check_passport",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_passport_info": {
+      "status": "http_error",
+      "tool": "check_passport_info",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "check_person_status": {
+      "status": "http_error",
+      "tool": "check_person_status",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_fsrar_licenses": {
+      "status": "http_error",
+      "tool": "get_fsrar_licenses",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    },
+    "get_api_statistics": {
+      "status": "http_error",
+      "tool": "get_api_statistics",
+      "error": "Client error '400 Bad Request' for url 'http://localhost:8080/mcp'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+    }
+  }
+}

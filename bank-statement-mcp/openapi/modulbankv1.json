@@ -1,0 +1,3831 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "v1",
+    "title": "Интеграция с Модульбанком по API",
+    "description": "API — технология, которая поможет подключить личный кабинет Модульбанка к любому сервису для бизнеса. \r\n                Не нужно подавать заявку на подключение и ничего согласовывать — подключиться можете прямо из личного кабинета банка.<br/><br/>\r\n<b>Описание протокола</b><br/><br/>\r\nЗапросы осуществляются посредством протокола https, на адрес <b>https://api.modulbank.ru/v1/</b>. Для авторизации HTTP-запросы должны содержать следующий заголовок: <b>Authorization: Bearer<access_token></b>, где `access_token` — токен авторизации права на исполнение запрашиваемого метода с заданным набором параметров.<br/>\r\nПараметры запроса передаются в теле сообщения. Допустимо передавать данные как в формате application/json так и в формате x-www-form-urlencoded.<br/><br/>\r\n<b>Режим песочницы</b><br/><br/>\r\nПесочница — это созданный для разработки режим работы API, при котором все реальные данные о пользователях, компаниях, счетах и транзакциях подменяются на тестовые. С помощью песочницы вы можете разрабатывать и отлаживать свой код не имея учетной записи и открытого расчетного счета в Модульбанке. Для того чтобы наше API распознало входящий запрос как запрос к песочнице, нужно ясно указать это в запросе одним из двух способов: добавить в HTTP заголовок запроса (http request header) `sandbox: on` или добавить в URI GET параметр `sandbox = on`.<br/>\r\nТакже следует помнить, что в режиме песочницы запрещено использовать реальные данные — идентификаторы приложений, токены авторизации и т. д. Вместо реальных идентификаторов в песочнице разрешается использовать следующие:<br/><br/>\r\n<table>\r\n<thead>\r\n<tr><th>Поле</th><th>Значение</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>clientId</td><td>sandboxapp</td><td>Идентификатор приложения</td></tr>\r\n<tr><td>clientSecret</td><td>sandboxappsecret</td><td>Секретное слово приложения</td></tr>\r\n<tr><td>token</td><td>sandboxtoken</td><td>Токен авторизации</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\nВ песочнице реализована ограниченная функциональность, в т.ч. для запроса просмотра истории операций https://api.modulbank.ru/v1/operation-history/{accountId} работают только фильтры records и skip.<br/><br/>\r\n<b>Требования к разработчикам</b><br/><br/>\r\n<ol><li>Приложение должно производить все сетевые взаимодействия по протоколу HTTPS</li><br/>\r\n<li>Приложение должно проверять корректность SSL-сертификата сервера. Если SSL-сертификат не прошел проверку, необходимо немедленно прекратить сессию, чтобы не допустить утечку данных авторизации</li><br/>\r\n<li>Приложение не должно хранить токен авторизации в открытом виде (cookie и т. д.)</li><br/>\r\n<li>Приложение должно корректно информировать пользователей о недоступности сервиса Модульбанка (в случае проведения сервисных работ на стороне сервера API возвращает ответ с HTTP статусом 503 на все виды запросов)</li></ol><br/><br/>\r\n                <b>Как с нами связаться:</b><br/>\r\n                Если у вас есть вопросы или API банка не решает ваши задачи, пишите нам<br/>\r\n                api@modulbank.ru<br/><br/>\r\n                Отвечаем в течение одного рабочего дня."
+  },
+  "host": "api.modulbank.ru",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/account-info": {
+      "post": {
+        "tags": [
+          "Получение данных"
+        ],
+        "summary": "Получение информации о компаниях пользователя",
+        "description": "Получение информации о компаниях пользователя (один и тот же клиент Модульбанка может быть сотрудником нескольких компаний) и счетах компаний пользователя.<br /><br /><b>Требуемые права токена</b><br />`account-info`<br />",
+        "operationId": "AccountInfo_GetAllUserAccounts",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StorageServices.Contracts.PublicApi.AccountInfo.Company"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account-info/balance/{accountId}": {
+      "post": {
+        "tags": [
+          "Получение данных"
+        ],
+        "summary": "Получение баланса по счету",
+        "description": "<b>Требуемые права токена</b>\r\n<br />`account-info`<br />",
+        "operationId": "AccountInfo_GetBalance",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Системный идентификатор счета, по которому запрашиваются баланс. Этот параметр передается как часть URI.",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "/account-info/balance/{accountId}/{date}": {
+      "post": {
+        "tags": [
+          "Получение данных"
+        ],
+        "summary": "Получение баланса по счету за дату",
+        "description": "<b>Требуемые права токена</b>\r\n<br />`account-info`<br />",
+        "operationId": "AccountInfo_GetBalanceByDate",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Системный идентификатор счета, по которому запрашиваются баланс. Этот параметр передается как часть URI.",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "description": "дата, за которую требуется баланс",
+            "required": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "format": "double",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "/account-info/balance-details/{accountId}": {
+      "post": {
+        "tags": [
+          "Получение данных"
+        ],
+        "summary": "Получение баланса и овердрафта по счету",
+        "description": "<b>Требуемые права токена</b>\r\n<br />`account-info`<br />",
+        "operationId": "AccountInfo_GetBalanceDetails",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Системный идентификатор счета, по которому запрашиваются баланс. Этот параметр передается как часть URI.",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.AccountInfo.BalanceContract"
+            }
+          }
+        }
+      }
+    },
+    "/beneficial/{accountNumber}/import": {
+      "post": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Отправить данные бенефициаров",
+        "operationId": "Beneficial_SendBeneficiaryOwnerDataAsync",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "accountNumber",
+            "in": "path",
+            "description": "Номер номинального счета в Модульбанке",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contract",
+            "in": "body",
+            "description": "Данные о бенефициарах",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialDataInContract"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportResultOutContract"
+            }
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficial/{nominalAccountNumber}/report": {
+      "get": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Получить файл отчёта",
+        "operationId": "Beneficial_GetReportAsync",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Файл отчёта"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficial/{nominalAccountNumber}/report/send": {
+      "post": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Проверить и передать в банк подписанный отчёт",
+        "operationId": "Beneficial_SendReportAsync",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "signedDocumentRequest",
+            "in": "body",
+            "description": "Строка в формате Base64 с отсоединённой подписью файла c отчётом",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.SignedDocumentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficial/{nominalAccountNumber}/forms/parts": {
+      "get": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Получить список частей анкет по бенефициарам",
+        "operationId": "Beneficial_GetFormPartsListAsync",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.BeneficialFormPartsListResponse"
+            }
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficial/{nominalAccountNumber}/forms/parts/{partId}": {
+      "get": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Получить файл с частью конкретной анкеты",
+        "operationId": "Beneficial_GetFormPartAsync",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "partId",
+            "in": "path",
+            "description": "Guid части конкретной анкеты",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Файл анкеты"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficial/{nominalAccountNumber}/forms/parts/{partId}/send": {
+      "post": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Проверить и передать в банк подписанную часть анкеты",
+        "operationId": "Beneficial_SendFormPartAsync",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "partId",
+            "in": "path",
+            "description": "Id (Guid) части анкеты, которую нужно передать",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "signedDocumentRequest",
+            "in": "body",
+            "description": "Строка в формате Base64 с отсоединённой подписью файла с этой частью\r\n            анкеты",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.SignedDocumentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficiaries/v2/{nominalAccountNumber}/reports/unsigned": {
+      "get": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Метод получения информации о не подписанных отчетов",
+        "operationId": "BeneficiariesV2_UnsignedReportsAsync",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информации об не подписанных отчетов"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficiaries/v2/{bankAccountNumber}/report/{id}": {
+      "get": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Метод получения файла отчета",
+        "operationId": "BeneficiariesV2_GetReportFileAsync",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "bankAccountNumber",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Файл отчёта"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/beneficiaries/v2/{nominalAccountNumber}/report/{id}/send": {
+      "post": {
+        "tags": [
+          "Номинальные счета"
+        ],
+        "summary": "Проверить и передать в банк подписанный отчёт",
+        "operationId": "BeneficiariesV2_SendReportAsync",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "nominalAccountNumber",
+            "in": "path",
+            "description": "Номер номинального счёта",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id отчета",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "name": "signedDocumentRequest",
+            "in": "body",
+            "description": "Строка в формате Base64 с отсоединённой подписью файла c отчётом",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.SignedDocumentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Ошибка в переданных данных"
+          },
+          "401": {
+            "description": "Ошибка авторизации"
+          }
+        }
+      }
+    },
+    "/oauth/authorize": {
+      "get": {
+        "tags": [
+          "Авторизация и аутентификация"
+        ],
+        "summary": "Запрос авторизации GET",
+        "description": "Приложение отправляет запрос авторизации на сервер Модульбанка. Запрос авторизации отправляется из браузера клиента.",
+        "operationId": "OAuth_AuthorizeGet",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "model.clientId",
+            "in": "query",
+            "description": "Идентификатор приложения. Для получения идентификатора для приложения напишите нам на api@modulbank.ru",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "model.redirectUri",
+            "in": "query",
+            "description": "URI, на который сервер OAuth передает результат авторизации. Значение этого параметра при посимвольном сравнении должно быть идентично значению redirect_uri, указанному при регистрации приложения. При сравнении не учитываются индивидуальные параметры приложения, которые могут быть добавлены в конец строки URI.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "model.scope",
+            "in": "query",
+            "description": "Список запрашиваемых прав. Разделитель элементов списка — пробел. Элементы списка чувствительны к регистру.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "model.state",
+            "in": "query",
+            "description": "Параметр будет добавлен к redirectUri c тем же значением.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Авторизация и аутентификация"
+        ],
+        "summary": "Запрос авторизации POST",
+        "description": "Приложение отправляет запрос авторизации на сервер Модульбанка. Запрос авторизации отправляется из браузера клиента.",
+        "operationId": "OAuth_AuthorizePost",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OAuth.AuthContract"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/oauth/token": {
+      "post": {
+        "tags": [
+          "Авторизация и аутентификация"
+        ],
+        "summary": "Обмен временного токена на токен авторизации",
+        "description": "Временный токен (значение поля code ответа) подлежит немедленному обмену на токен авторизации. Время действия этого токена — меньше 1 минуты. Приложение должно получить и обработать ответ сервера и немедленно самостоятельно обменять временный токен на токен авторизации. Если приложению не удалось получить ответ сервера, временный токен утерян, либо срок его действия истек, необходимо повторить процедуру авторизации. Если авторизация завершилась успехом, приложение должно немедленно обменять временный токен на токен авторизации. Для этого необходимо отправить запрос, содержащий временный токен, на сервер авторизации Модульбанка.\r\nИспользовать временный токен можно только один раз. Если приложению не удалось получить ответ сервера за время жизни временного токена, процедуру авторизации следует повторить сначала. Внимание! Полученный accessToken является симметричным секретом авторизации, поэтому разработчик приложения должен предпринять меры по его защите: хранить токен в зашифрованном виде, предоставлять доступ к нему только после авторизации пользователя в приложении. Срок действия токена 3 года. По истечении этого времени, токен автоматически аннулируется.",
+        "operationId": "OAuth_GetTokenByTempCode",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OAuth.TokenRequestContract"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OAuth.TokenResponseContract"
+            }
+          }
+        }
+      }
+    },
+    "/operation-history/{accountId}": {
+      "post": {
+        "tags": [
+          "Получение данных"
+        ],
+        "summary": "Просмотр истории операций",
+        "description": "<b>Требуемые права токена</b>\r\n<br />`operation-history`<br /><br />\r\n            Список статусов платежей<br /><table><thead><tr><th>Статус</th><th>Расшифровка</th></tr></thead><tbody><tr><td>Draft</td><td>Черновик</td></tr><tr><td>SendToBank</td><td>Ожидающая исполнения</td></tr><tr><td>Executed</td><td>Исполненная</td></tr><tr><td>RejectByBank</td><td>Отказано банком в исполнении</td></tr><tr><td>Canceled</td><td>Отменённая</td></tr><tr><td>Received</td><td>Исполненная</td></tr><tr><td>PayReceived</td><td>Исполненная (Оплачено)</td></tr><tr><td>ClarifyRequiredOutcome</td><td>Требует уточнения</td></tr></tbody></table><br />",
+        "operationId": "OperationHistory_GetList",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "Обязательный параметр. Системный идентификатор счета.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "model",
+            "in": "body",
+            "description": "Фильтр по параметрам операций.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationHistory.OperationHistoryTransactionsFilter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationHistory.Transaction"
+              }
+            }
+          },
+          "400": {
+            "description": "{ exceptionType: 'AccessDenied',  message: 'У пользователя нет доступа к счёту' }"
+          }
+        }
+      }
+    },
+    "/operation-upload": {
+      "post": {
+        "tags": [
+          "Загрузка данных"
+        ],
+        "summary": "Импорт платежей в формате JSON",
+        "description": "<b>Примеры заполнения</b>\r\n<br />\r\n<br />\r\n<b>Платёж контрагенту</b>\r\n<br />\r\n<code>\r\n             {<br />\"payment\":<br />\r\n             {<br /> \"Number\": \"12345\",<br /> \"Date\": \"15.08.2023\",<br /> \"Sum\": 1.01,<br /> \"PayerAccount\": \"40802810870010433949\",<br /> \"RecipientName\": \"ООО Ромашка\",<br /> \"RecipientINN\": \"1242610857\",<br /> \"RecipientKPP\": \"256845746\",<br /> \"RecipientAccount\": \"40702810870010408317\",<br /> \"RecipientBankBik\": \"044525092\",<br /> \"RecipientBankCorrAccount\": \"30101810645250000092\",<br /> \"PaymentPurpose\": \"Оплата поставщику Без НДС\",<br /> \"TypeIndicator\": \"0\" // УИН платежа <br />},<br />\r\n             \"parameters\":<br />\r\n             {<br /> \"targetStatus\": \"InSigning\" // если не указывать - будет черновик, если указать - сразу переведётся на подпись <br /> }<br />}\r\n             </code>\r\n<br />\r\n<br />\r\n<b>Бюджетный платёж</b>\r\n<br />\r\n<code>\r\n             {<br />\"payment\":<br />\r\n             {<br /> \"Number\": \"12345\",<br /> \"Date\": \"2023-08-15T00:00:00\",<br /> \"Sum\": \"400\",<br /> \"PayerAccount\": \"40802810870010433949\",<br /> \"RecipientName\": \"Казначейство России (ФНС России)\",<br /> \"RecipientINN\": \"7727406020\",<br /> \"RecipientKPP\": \"770801001\",<br /> \"RecipientAccount\": \"03100643000000018500\",<br /> \"RecipientBankBik\": \"017003983\",<br /> \"RecipientBankCorrAccount\": \"40102810445370000059\",<br /> \"PaymentPurpose\": \"Фиксированные страховые взносы на ОМС за 2 квартал 2022 г.\",<br /> \"PayerStatus\": \"01\", // или 13<br /> \"KBK\": \"18201061201010000510\",<br /> \"OKTMO\": \"12345678\", // или 0<br /> \"PaymentBase\": \"0\", // основание платежа<br /> \"Period\": \"0\", // налоговый период<br /> \"TypeIndicator\": \"0\", // УИН<br /> \"BudgetDocNumber\": \"0\", // номер документа основания платежа<br /> \"BudgetDocDate\": \"0\",<br /> \"PaymentPurposeCode\": \"0\", // код вида дохода<br /> \"PayerInn\": null //Только для удержаний из ЗП - ИНН плательщика (физика, за которого делается удержание)<br /> },<br />\r\n             \"parameters\":<br />\r\n             {<br /> \"targetStatus\": \"InSigning\"<br /> }<br />}\r\n             </code>\r\n<br />\r\n<br />\r\n<b>Платёж за 3 лицо</b>\r\n<br />\r\n<code>\r\n             {<br />\"payment\":<br /> {<br />\r\n             \"Number\": \"12345\",<br /> \"Date\": \"15.08.2023\",<br /> \"Sum\": 500.0,<br /> \"PayerAccount\": \"40802810870010433949\",<br /> \"RecipientName\": \"Управление Федерального казначейства по Тульской области\",<br /> \"RecipientINN\": \"7727406020\",\r\n             <br /> \"RecipientKPP\": \"770801001\",<br /> \"RecipientAccount\": \"03100643000000018500\",<br /> \"RecipientBankBik\": \"017003983\",<br /> \"RecipientBankCorrAccount\": \"40102810445370000059\",<br /> \"PaymentPurpose\": \"Оплата налога за прошлогодний снег\",<br /> \"PayerStatus\": \"13\",<br /> \"KBK\": \"18201061201010000510\",\r\n             <br /> \"OKTMO\": \"0\",<br /> \"PaymentBase\": \"0\", // основание платежа<br /> \"Period\": \"0\", // налоговый период<br /> \"BudgetDocNumber\": \"0\",<br /> \"BudgetDocDate\": \"0\",<br /> \"TypeIndicator\": \"32251003220104916002\", // или 0<br /> \"PayformDataThirdPerson\":<br />\r\n             {<br /> \"Name\": \"Иванов И.И.\",<br /> \"INN\": \"126674645763\",<br /> \"KPP\": \"0\"<br /> }<br />},\r\n             <br />\"parameters\":<br />\r\n             {<br /> \"targetStatus\": \"InSigning\"<br /> }<br />}\r\n             </code>\r\n<br />\r\n<br />",
+        "operationId": "OperationLoading_Upload",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Обязательный параметр. Платежное поручение в формате JSON.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationUpload.OperationJsonUploadRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.UploadPaymentResponseContract"
+            }
+          }
+        }
+      }
+    },
+    "/operation-upload/1c": {
+      "post": {
+        "tags": [
+          "Загрузка данных"
+        ],
+        "summary": "Импорт платежей в формате 1С",
+        "description": "Публичное апи позволяет загружать в личный кабинет платежные поручения в формате 1С (http://v8.1c.ru/edi/edi_stnd/100/101.htm). Все загруженные платежные поручения имеют статус «Черновик».<br /><br /><b>Пример заполнения</b><br /><br /><code>\r\n{<br />\"document\":\"1CClientBankExchange<br />ВерсияФормата=1.03\r\nКодировка=Windows<br /> ДатаСоздания = 23.08.2016<br />ВремяСоздания=09:50:53<br />ДатаНачала=24.07.2016<br />ДатаКонца=23.08.2016\r\nРасчСчет=40802810670010011008<br />СекцияДокумент=Платежное поручение<br />Номер=994720<br />Дата=11.08.2016<br />Сумма=100.00<br />НазначениеПлатежа=Для теста\r\nПлательщик1=Индивидуальный предприниматель Александров Александр Александрович<br />ПлательщикИНН = 770400372208<br />ПлательщикСчет =40802810670010011008\r\nПлательщикКПП=0<br />ПолучательКПП=771543001<br />ПоказательКБК=<br />ОКАТО=<br />ПоказательОснования=<br />ПоказательПериода=\r\nПоказательНомера=<br />ПоказательДаты=<br />ПоказательТипа=<br />ПлательщикБанк1=МОСКОВСКИЙ ФИЛИАЛ АО КБ \\\"МОДУЛЬБАНК\\\"\r\nПлательщикБИК=044525092<br />ПлательщикКорсчет=30101810645250000092<br />Получатель1=МОСКОВСКИЙ ФИЛИАЛ АО КБ \\\"МОДУЛЬБАНК\\\"\r\nПолучательИНН=2204000595<br />ПолучательСчет=30102810675250000092<br />ВидОплаты=01<br />СрокПлатежа=<br />Очередность=5\r\nВидПлатежа=<br />КодНазПлатежа=1<br />ДатаСписано=12.08.2016<br />ПолучательБанк1=МОСКОВСКИЙ ФИЛИАЛ АО КБ \\\"МОДУЛЬБАНК\\\"<br />\r\nПолучательБИК=044525092<br />ПолучательКорсчет=30102810675250000092<br />Код=<br />КонецДокумента<br />КонецФайла\"<br />}\r\n</code>",
+        "operationId": "OperationLoading_Upload1C",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Обязательный параметр. Документ с платежными поручениями в формате 1С.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationUpload.Operation1CUploadRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationUpload.OperationUploadResponse"
+            }
+          }
+        }
+      }
+    },
+    "/operation-upload/sign": {
+      "post": {
+        "tags": [
+          "Загрузка данных"
+        ],
+        "summary": "Подписание платежей",
+        "description": "Позволяет подписывать платежи квалифицированной электронной подписью. После подписания платежи отправляются в банк и проводятся.<br /><br />Для подписания составляем строку из id платежей отсортированных по алфавиту, без кавычек разделенных запятой, без пробелов. Для примера выше это:<br />`9c6f2638-e556-4fa3-b59d-fbb1ff2a8f6c,fa74a744-6aa9-436f-8f3c-e29a058999c0`<br /><br />Подписываем её через КриптоПро подписью компании которой они принадлежат.Полученную подпись переводим в Base64.<br /><br />\r\nДля подписания нужно скачать приложение cryptcp от компании КриптоПро и выполнить запрос:<br />\r\n`cryptcp.x64.exe -sign -f(путь к файлу хранилищу сертификатов ЭЦП) -dn \"((при необходимости) строка для поиска сертификата, например ИНН компании)\" -detached -pin(пароль) (путь к подписываемому файлу)`<br /><br />\r\nНапример:<br />\r\n`cryptcp.x64.exe -sign -f cert2.cer -dn \"7840473679\" -detached -pin password123 test.txt`<br /><br />\r\nДля отладки и проверки получившейся подписи можно воспользоваться сервисом https://saas.cryptopro.ru/verifycpca или https://dss.cryptopro.ru/Verify/#/signature",
+        "operationId": "OperationLoading_Sign",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Информация о платежах.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.DigitalSign.SignRequestContract"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.DigitalSign.SignResponseContract"
+            }
+          },
+          "400": {
+            "description": "{ exceptionType: 'SignCheckError',  message: 'Срок действия подписи <{FullName}> закончился {date}' }"
+          },
+          "401": {
+            "description": "{ exceptionType: 'AccessDenied',  message: 'Доступ запрещён' }"
+          }
+        }
+      }
+    },
+    "/sbp/retail-points": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Получение списка точек продаж",
+        "description": "Получение списка точек продаж, зарегистрированных в Системе Быстрых платежей. ID компании можно получить через запрос: account-info",
+        "operationId": "Qr_GetRetailPoints",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "query",
+            "description": "ID компании",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpRetailPointsResponse"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Регистрация торговой точки",
+        "description": "Запрос предназначен для регистрации торговой точки",
+        "operationId": "Qr_CreateRetailPoint",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Регистрационные данные",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpCreateRetailPointRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpCreateRetailPointResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/retail-points/{tspId}": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Получение ТСП",
+        "description": "Запрос на получение данных о торговой точке (ТСП) по идентификатору",
+        "operationId": "Qr_GetRetailPoint",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "tspId",
+            "in": "path",
+            "description": "ID торговой точки",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpRetailPointsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/retail-points/{tspId}/status": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Получение статуса регистрации ТСП",
+        "description": "Запрос на получение статуса регистрации торговой точки (ТСП) по идентификатору",
+        "operationId": "Qr_GetRetailPointStatus",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "tspId",
+            "in": "path",
+            "description": "ID торговой точки",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpRetailPointStatusResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/qr-codes/{qrcId}": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Получение данных QR-кода",
+        "description": "Запрос на получение статуса и свойств QR-кода по QrcId",
+        "operationId": "Qr_GetQrCode",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "ID QR-кода (QrcId)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiGetQrCodeResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/qr-codes/{qrcId}/image": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Получение изображения QR-кода",
+        "description": "Получение изображения QR-кода по QrcId в формате PNG",
+        "operationId": "Qr_GetQrCodeImage",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "ID QR-кода (QrcId)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/qr-codes/dynamic": {
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Создание нового динамического QR-кода",
+        "description": "Запрос предназначен для создания QR-кода для конкретной торговой точки",
+        "operationId": "Qr_CreateDynamicQrCode",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Данные для QR-кода",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiCreateDynamicQrCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiCreateDynamicQrCodeResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/qr-codes/refund": {
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Возврат по платежу",
+        "description": "Запрос предназначен для осуществления возврата по sbpOperId (идентификатор транзакции в СБП)",
+        "operationId": "Qr_RefundQrCode",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Данные для возврата",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiRefundQrCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiRefundQrCodeResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/qr-codes/refund/{refundId}": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Статус возврата",
+        "description": "Получить статус возврата QR-кода по внутреннему идентификатору, полученному при создании возврата",
+        "operationId": "Qr_GetRefundInfo",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "refundId",
+            "in": "path",
+            "description": "ID возврата",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiGetRefundResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/mcc": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Список МСС",
+        "description": "Получение списка МСС кодов (код категории продавца)",
+        "operationId": "Qr_GetMcc",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpGetMccResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/cash-links": {
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Регистрация Кассовой ссылки СБП",
+        "description": "Запрос предназначен для регистрация Кассовой ссылки СБП",
+        "operationId": "Qr_RegisterCashLink",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Регистрационные данные Кассовой ссылки СБП",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiRegisterCashLinkRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLink"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/cash-links/{qrcId}/activate": {
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Активировать Кассовую ссылку СБП",
+        "description": "Запрос предназначен для активировации Кассовой ссылки СБП",
+        "operationId": "Qr_ActivateCashLinkAsync",
+        "consumes": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/x-www-form-urlencoded",
+          "application/json-patch"
+        ],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "description": "Данные активации Кассовой ссылки СБП",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiActivateCashLinkRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLinkOperation"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/cash-links/{qrcId}/deactivate": {
+      "post": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Деактивировать Кассовую ссылку СБП",
+        "description": "Запрос предназначен для деактивировации Кассовой ссылки СБП",
+        "operationId": "Qr_DeactivateCashLinkAsync",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/sbp/cash-links/{qrcId}/status": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Статус Кассовой ссылки СБП",
+        "description": "Получить статус Кассовой ссылки СБП",
+        "operationId": "Qr_GetCashLinkStatus",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLink"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/cash-links/{qrcId}/operations/{paramsId}/status": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Статус операции Кассовой ссылки СБП",
+        "description": "Получить статус операции Кассовой ссылки СБП",
+        "operationId": "Qr_GetCashLinkOperationStatus",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "paramsId",
+            "in": "path",
+            "description": "Идентификатор активных значений параметров Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLinkOperation"
+            }
+          }
+        }
+      }
+    },
+    "/sbp/cash-links/{qrcId}/operations": {
+      "get": {
+        "tags": [
+          "QR Pay"
+        ],
+        "summary": "Список операций Кассовой ссылки СБП",
+        "description": "Получить список операций Кассовой ссылки СБП",
+        "operationId": "Qr_GetCashLinkOperations",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "parameters": [
+          {
+            "name": "qrcId",
+            "in": "path",
+            "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLinkOperation"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/revoke": {
+      "post": {
+        "tags": [
+          "Авторизация и аутентификация"
+        ],
+        "summary": "Отзыв токена",
+        "description": "Приложение может отозвать полученный токен авторизации.",
+        "operationId": "Revoke_Revoke",
+        "consumes": [],
+        "produces": [
+          "application/json",
+          "text/json",
+          "application/xml",
+          "text/xml",
+          "application/json-patch"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "StorageServices.Contracts.PublicApi.AccountInfo.Company": {
+      "required": [
+        "companyId",
+        "registrationCompleted"
+      ],
+      "type": "object",
+      "properties": {
+        "companyId": {
+          "format": "uuid",
+          "description": "Системный идентификатор компании.",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "companyName": {
+          "description": "Название компании.",
+          "type": "string"
+        },
+        "bankAccounts": {
+          "description": "Массив счетов компании.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StorageServices.Contracts.PublicApi.AccountInfo.BankAccount"
+          }
+        },
+        "registrationCompleted": {
+          "description": "Признак окончания регистрации компании.",
+          "type": "boolean"
+        },
+        "Inn": {
+          "description": "ИНН",
+          "type": "string"
+        },
+        "Kpp": {
+          "description": "КПП",
+          "type": "string"
+        },
+        "Ogrn": {
+          "description": "ОГРН",
+          "type": "string"
+        }
+      },
+      "example": {
+        "companyId": "70ca00f6-1f10-4964-aca6-a5ec032efe37",
+        "companyName": "ООО \"Ромашка\"",
+        "bankAccounts": [
+          {
+            "accountName": "Основной счет",
+            "balance": 900000.0,
+            "bankBic": "044583340",
+            "bankInn": "2204000595",
+            "bankKpp": "770443001",
+            "bankCorrespondentAccount": "30101810000000000001",
+            "bankName": "МОСКОВСКИЙ ФИЛИАЛ ОАО КБ\"РЕГИОНАЛЬНЫЙ КРЕДИТ\" Г.МОСКВА",
+            "beginDate": "2015-10-07T00:00:00",
+            "category": "CheckingAccount",
+            "currency": "RUR",
+            "id": "edb10116-5a93-4963-a53b-a5ec037177f0",
+            "number": "40802810070000000001",
+            "status": "New"
+          }
+        ],
+        "registrationCompleted": true,
+        "Inn": "2204000595",
+        "Kpp": "771543001",
+        "Ogrn": "1022200525841"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.AccountInfo.BankAccount": {
+      "required": [
+        "balance",
+        "id"
+      ],
+      "type": "object",
+      "properties": {
+        "accountName": {
+          "description": "Наименование счета.",
+          "type": "string"
+        },
+        "balance": {
+          "format": "double",
+          "description": "Баланс на счете.",
+          "type": "number"
+        },
+        "bankBic": {
+          "description": "БИК Банка.",
+          "type": "string"
+        },
+        "bankInn": {
+          "description": "ИНН Банка.",
+          "type": "string"
+        },
+        "bankKpp": {
+          "description": "КПП Банка.",
+          "type": "string"
+        },
+        "bankCorrespondentAccount": {
+          "description": "Корр. счет.",
+          "type": "string"
+        },
+        "bankName": {
+          "description": "Наименование банка.",
+          "type": "string"
+        },
+        "beginDate": {
+          "description": "Дата открытия счета.",
+          "type": "string"
+        },
+        "category": {
+          "description": "Категория счета. Возможные значения: CheckingAccount (расчетный счет), DepositAccount (депозитный счет), CardAccount (карточный счет), DepositRateAccount (счет для процентов по депозиту), ReservationAccounting (счет учета резервов).",
+          "type": "string"
+        },
+        "currency": {
+          "description": "Код валюты. Возможные значения — RUR, USD, EUR, CNY.",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "description": "Системный идентификатор счета.",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "number": {
+          "description": "Номер счета.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Состояния счета. Возможные значения — New (открытый), Deleted (удаленный), Closed (закрытый), Freezed (замороженный), ToClosed (в процессе закрытия), ToOpen (в процессе открытия).",
+          "type": "string"
+        },
+        "transitAccountId": {
+          "format": "uuid",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        }
+      }
+    },
+    "StorageServices.Contracts.PublicApi.AccountInfo.BalanceContract": {
+      "required": [
+        "Balance",
+        "Overdraft"
+      ],
+      "type": "object",
+      "properties": {
+        "Balance": {
+          "format": "double",
+          "description": "Баланс",
+          "type": "number"
+        },
+        "Overdraft": {
+          "format": "double",
+          "description": "Сумма доступного лимита по овердрафту",
+          "type": "number"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialDataInContract": {
+      "type": "object",
+      "properties": {
+        "LegalEntityData": {
+          "description": "Сегмент данных о бенефициарных владельцах-юридических лицах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialLegalEntityDataInContract"
+          }
+        },
+        "IndividualEntrepreneurData": {
+          "description": "Сегмент данных о бенефициарных владельцах-индивидуальных предпринимателях",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialIpDataInContract"
+          }
+        },
+        "IndividualData": {
+          "description": "Сегмент данных о бенефициарных владельцах-физических лицах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialIndividualDataInContract"
+          }
+        },
+        "NonResidentLegalEntityData": {
+          "description": "Сегмент данных о бенефициарных владельцах-нерезидентах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialNonResidentLegalEntityDataInContract"
+          }
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialLegalEntityDataInContract": {
+      "required": [
+        "Name",
+        "Ogrn",
+        "Kpp",
+        "LegalAddress",
+        "LeaderFullName",
+        "AccountNumber",
+        "Inn",
+        "DocumentRequisites",
+        "PhoneNumber",
+        "Email"
+      ],
+      "type": "object",
+      "properties": {
+        "Name": {
+          "description": "Наименование бенефициара",
+          "type": "string"
+        },
+        "Ogrn": {
+          "description": "ОГРН бенефициара",
+          "type": "string"
+        },
+        "Kpp": {
+          "description": "КПП бенефициара",
+          "type": "string"
+        },
+        "LegalAddress": {
+          "description": "Юридический адрес бенефициара",
+          "type": "string"
+        },
+        "LeaderFullName": {
+          "description": "ФИО единоличного исполнительного органа",
+          "type": "string"
+        },
+        "AccountNumber": {
+          "description": "Номер лицевого счета, присвоенный бенефициару при регистрации в платформе клиента",
+          "type": "string"
+        },
+        "Inn": {
+          "description": "ИНН бенефициара",
+          "type": "string"
+        },
+        "DocumentRequisites": {
+          "description": "Документ-основание\r\nРеквизиты соглашения, заключенного между клиентом и бенефициаром",
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "description": "Контактный телефон бенефициара",
+          "type": "string"
+        },
+        "Email": {
+          "description": "Эл адрес бенефициара",
+          "type": "string"
+        }
+      },
+      "example": {
+        "Name": "ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ ЦВЕТОК",
+        "Ogrn": "1234567898765",
+        "Kpp": "123456789",
+        "LegalAddress": "458769, Респ Хакасия, г Абакан, ул Пушкина, д 193, оф 10",
+        "LeaderFullName": "Пучков Александр Иванович",
+        "AccountNumber": "1234567",
+        "Inn": "1234567898",
+        "DocumentRequisites": "Заявление о присоединении к Правилам платформы «МодульДеньги» I-2069191 от 20.04.2020",
+        "PhoneNumber": "+79251234567",
+        "Email": "test@test.test"
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialIpDataInContract": {
+      "required": [
+        "Ogrn",
+        "Passport",
+        "AccountNumber",
+        "Inn",
+        "DocumentRequisites",
+        "PhoneNumber",
+        "Email"
+      ],
+      "type": "object",
+      "properties": {
+        "Ogrn": {
+          "description": "ОГРН бенефициара",
+          "type": "string"
+        },
+        "Passport": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialPassportInContract",
+          "description": "Паспорт"
+        },
+        "Snils": {
+          "description": "СНИЛС",
+          "type": "string"
+        },
+        "ConfirmingStayDocuments": {
+          "description": "Список документов подтверждающих право иностранного гражданина на пребывание в РФ",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.ConfirmingStayDocumentContract"
+          }
+        },
+        "AccountNumber": {
+          "description": "Номер лицевого счета, присвоенный бенефициару при регистрации в платформе клиента",
+          "type": "string"
+        },
+        "Inn": {
+          "description": "ИНН бенефициара",
+          "type": "string"
+        },
+        "DocumentRequisites": {
+          "description": "Документ-основание\r\nРеквизиты соглашения, заключенного между клиентом и бенефициаром",
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "description": "Контактный телефон бенефициара",
+          "type": "string"
+        },
+        "Email": {
+          "description": "Эл адрес бенефициара",
+          "type": "string"
+        }
+      },
+      "example": {
+        "Ogrn": "1234567898745",
+        "Passport": {
+          "Surname": "Первушин",
+          "FirstName": "Петр",
+          "MiddleName": "Петрович",
+          "Series": "1234",
+          "Number": "123456",
+          "NonResidentDateOfIssue": "2022-02-12T12:37:26.0321",
+          "Issued": "Центральным РОВД Новокузнецкого УВД Кемеровской обл.",
+          "IssuedNumber": "123-123",
+          "DateOfIssue": "2020-07-01T00:00:00",
+          "BirthDate": "1995-06-23T00:00:00",
+          "BirthPlace": "",
+          "Citizenship": "Российской Федерации",
+          "CountryCode": "IncorrectValue",
+          "Address": "г Нижний Новгород, пр-кт Октябкя, д 152, кв 1"
+        },
+        "AccountNumber": "1234567",
+        "Inn": "1234567898",
+        "DocumentRequisites": "Заявление о присоединении к Правилам платформы «МодульДеньги» I-2069191 от 20.04.2020",
+        "PhoneNumber": "+79221456230",
+        "Email": "test@test.test"
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialIndividualDataInContract": {
+      "required": [
+        "Passport",
+        "AccountNumber",
+        "Inn",
+        "DocumentRequisites",
+        "PhoneNumber",
+        "Email"
+      ],
+      "type": "object",
+      "properties": {
+        "Passport": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialPassportInContract",
+          "description": "Паспорт"
+        },
+        "Snils": {
+          "description": "СНИЛС",
+          "type": "string"
+        },
+        "ConfirmingStayDocuments": {
+          "description": "Список документов подтверждающих право иностранного гражданина на пребывание в РФ",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.ConfirmingStayDocumentContract"
+          }
+        },
+        "AccountNumber": {
+          "description": "Номер лицевого счета, присвоенный бенефициару при регистрации в платформе клиента",
+          "type": "string"
+        },
+        "Inn": {
+          "description": "ИНН бенефициара",
+          "type": "string"
+        },
+        "DocumentRequisites": {
+          "description": "Документ-основание\r\nРеквизиты соглашения, заключенного между клиентом и бенефициаром",
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "description": "Контактный телефон бенефициара",
+          "type": "string"
+        },
+        "Email": {
+          "description": "Эл адрес бенефициара",
+          "type": "string"
+        }
+      },
+      "example": {
+        "Passport": {
+          "Surname": "Первушин",
+          "FirstName": "Петр",
+          "MiddleName": "Петрович",
+          "NonResidentNumber": "12345678",
+          "NonResidentDateOfIssue": "2021-04-03T05:36:26.0321",
+          "DateOfIssue": "2020-08-06T00:00:00",
+          "BirthDate": "1986-08-30T00:00:00",
+          "BirthPlace": "",
+          "CountryCode": "KGZ",
+          "Address": "г Нижний Новгород, пр-кт Октябкя, д 152, кв 1"
+        },
+        "ConfirmingStayDocuments": [
+          {
+            "DocumentType": "Visa",
+            "Series": "Series_123456789",
+            "Number": "Number_123456789",
+            "StartDate": "2015-09-03T00:00:00",
+            "EndDate": "2023-03-15T00:00:00"
+          }
+        ],
+        "AccountNumber": "1234567",
+        "Inn": "1234567898",
+        "DocumentRequisites": "Заявление о присоединении к Правилам платформы «МодульДеньги» I-2069191 от 20.04.2020",
+        "PhoneNumber": "+79221456230",
+        "Email": "test@test.test"
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialNonResidentLegalEntityDataInContract": {
+      "required": [
+        "Name",
+        "LegalAddress",
+        "LeaderFullName",
+        "AccountNumber",
+        "Inn",
+        "DocumentRequisites",
+        "PhoneNumber",
+        "Email"
+      ],
+      "type": "object",
+      "properties": {
+        "RegistrationNumber": {
+          "description": "Регистрационный номер юридического лица по месту учреждения и регистрации",
+          "type": "string"
+        },
+        "RussianRegistrationNumber": {
+          "description": "Идентификационный номер налогоплательщика или код иностранной организации, присвоенный\r\nдо 24 декабря 2010 года, либо идентификационный номер налогоплательщика, присвоенный\r\nпосле 24 декабря 2010 года, - для нерезидента",
+          "type": "string"
+        },
+        "RegistrationDate": {
+          "format": "date-time",
+          "description": "Дата государственной регистрации",
+          "type": "string"
+        },
+        "RegistrationPlace": {
+          "description": "Место государственной регистрации (местонахождение)",
+          "type": "string"
+        },
+        "Name": {
+          "description": "Наименование бенефициара",
+          "type": "string"
+        },
+        "LegalAddress": {
+          "description": "Адрес бенефициара",
+          "type": "string"
+        },
+        "LeaderFullName": {
+          "description": "Сведения об органах юридического лица",
+          "type": "string"
+        },
+        "AccountNumber": {
+          "description": "Номер лицевого счета, присвоенный бенефициару при регистрации в платформе клиента",
+          "type": "string"
+        },
+        "Inn": {
+          "description": "ИНН бенефициара",
+          "type": "string"
+        },
+        "DocumentRequisites": {
+          "description": "Документ-основание\r\nРеквизиты соглашения, заключенного между клиентом и бенефициаром",
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "description": "Контактный телефон бенефициара",
+          "type": "string"
+        },
+        "Email": {
+          "description": "Эл адрес бенефициара",
+          "type": "string"
+        }
+      },
+      "example": {
+        "RegistrationNumber": "123456",
+        "RegistrationDate": "2022-02-12T12:37:26.0321",
+        "RegistrationPlace": "1600 Pennsylvania Avenue NW, Washington, DC 20500, United States",
+        "Name": "Apple TRc.",
+        "LegalAddress": "One Apple Park Way, Cupertino, CA 95014, United States",
+        "LeaderFullName": "Tim Cook",
+        "AccountNumber": "123654",
+        "Inn": "1234567898",
+        "DocumentRequisites": "Договор № 123456 от 2020-02-02",
+        "PhoneNumber": "+79832145687",
+        "Email": "test@test.test"
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialPassportInContract": {
+      "required": [
+        "Surname",
+        "FirstName",
+        "Series",
+        "Number",
+        "Issued",
+        "DateOfIssue",
+        "BirthDate",
+        "Citizenship",
+        "Address",
+        "NonResidentDateOfIssue",
+        "CountryCode"
+      ],
+      "type": "object",
+      "properties": {
+        "Surname": {
+          "description": "Фамилия",
+          "type": "string"
+        },
+        "FirstName": {
+          "description": "Имя",
+          "type": "string"
+        },
+        "MiddleName": {
+          "description": "Отчество",
+          "type": "string"
+        },
+        "Series": {
+          "description": "Серия паспорта",
+          "type": "string"
+        },
+        "Number": {
+          "description": "Номер паспорта",
+          "type": "string"
+        },
+        "NonResidentNumber": {
+          "description": "Номер паспорта нерезидента",
+          "type": "string"
+        },
+        "NonResidentDateOfIssue": {
+          "format": "date-time",
+          "description": "Дата выдачи паспорта нерезидента",
+          "type": "string"
+        },
+        "Issued": {
+          "description": "Наименование органа, выдавшего документ",
+          "type": "string"
+        },
+        "IssuedNumber": {
+          "description": "Код подразделения",
+          "type": "string"
+        },
+        "DateOfIssue": {
+          "format": "date-time",
+          "description": "Дата выдачи документа",
+          "type": "string"
+        },
+        "BirthDate": {
+          "format": "date-time",
+          "description": "Дата рождения",
+          "type": "string"
+        },
+        "BirthPlace": {
+          "description": "Место рождения",
+          "type": "string"
+        },
+        "Citizenship": {
+          "description": "Гражданство",
+          "type": "string"
+        },
+        "CountryCode": {
+          "description": "Код страны",
+          "enum": [
+            "IncorrectValue",
+            "RUS",
+            "BLR",
+            "ARM",
+            "KAZ",
+            "KGZ",
+            "ABH",
+            "AUS",
+            "AUT",
+            "AZE",
+            "ALB",
+            "DZA",
+            "ASM",
+            "AGO",
+            "AND",
+            "ATG",
+            "ARG",
+            "ABW",
+            "AFG",
+            "BHS",
+            "BGD",
+            "BRB",
+            "BHR",
+            "BLZ",
+            "BEL",
+            "BEN",
+            "BMU",
+            "BGR",
+            "BOL",
+            "BIH",
+            "BWA",
+            "BRA",
+            "IOT",
+            "BRN",
+            "BFA",
+            "BDI",
+            "BTN",
+            "VUT",
+            "VAT",
+            "GBR",
+            "HUN",
+            "VEN",
+            "VNM",
+            "GAB",
+            "HTI",
+            "GUY",
+            "GMB",
+            "GHA",
+            "GLP",
+            "GTM",
+            "GGY",
+            "GIN",
+            "GNB",
+            "HND",
+            "GRD",
+            "GRL",
+            "GRC",
+            "GEO",
+            "GUM",
+            "DNK",
+            "JEY",
+            "DJI",
+            "DMA",
+            "DOM",
+            "EGY",
+            "ZMB",
+            "ZWE",
+            "ISR",
+            "IND",
+            "IDN",
+            "JOR",
+            "IRQ",
+            "IRN",
+            "IRL",
+            "ISL",
+            "ESP",
+            "ITA",
+            "YEM",
+            "CPV",
+            "KHM",
+            "CMR",
+            "CAN",
+            "QAT",
+            "KEN",
+            "CYP",
+            "KIR",
+            "CHN",
+            "COL",
+            "COM",
+            "COG",
+            "COD",
+            "KOS",
+            "CRI",
+            "CIV",
+            "CUB",
+            "KWT",
+            "LAO",
+            "LVA",
+            "LSO",
+            "LBR",
+            "LBN",
+            "LBY",
+            "LTU",
+            "LIE",
+            "LUX",
+            "MUS",
+            "MRT",
+            "MDG",
+            "MYT",
+            "MAC",
+            "MWI",
+            "MYS",
+            "MLI",
+            "MDV",
+            "MLT",
+            "MAR",
+            "MTQ",
+            "MEX",
+            "FSM",
+            "MOZ",
+            "MCO",
+            "MNG",
+            "MSR",
+            "MMR",
+            "NAM",
+            "NRU",
+            "NPL",
+            "NER",
+            "NGA",
+            "NLD",
+            "NIC",
+            "NIU",
+            "NCL",
+            "NZL",
+            "NOR",
+            "OMN",
+            "CYM",
+            "IMN",
+            "PAK",
+            "PLW",
+            "PSE",
+            "PAN",
+            "PNG",
+            "PRY",
+            "PER",
+            "POL",
+            "PRT",
+            "PRI",
+            "KOR",
+            "MDA",
+            "RWA",
+            "ROU",
+            "SLV",
+            "WSM",
+            "SMR",
+            "SAU",
+            "SWZ",
+            "SHN",
+            "MKD",
+            "SYC",
+            "SEN",
+            "VCT",
+            "KNA",
+            "LCA",
+            "SRB",
+            "SGP",
+            "SYR",
+            "SVK",
+            "SVN",
+            "USA",
+            "SOM",
+            "SDN",
+            "SUR",
+            "SLE",
+            "TJK",
+            "THA",
+            "TWN",
+            "TZA",
+            "TGO",
+            "TON",
+            "TTO",
+            "TUV",
+            "TKM",
+            "TUR",
+            "UGA",
+            "UZB",
+            "UKR",
+            "URY",
+            "FRO",
+            "FJI",
+            "PHL",
+            "FIN",
+            "FLK",
+            "FRA",
+            "GUF",
+            "PYF",
+            "HRV",
+            "CAF",
+            "TCD",
+            "MNE",
+            "CZE",
+            "CHL",
+            "CHE",
+            "SWE",
+            "LKA",
+            "ECU",
+            "GNQ",
+            "ERI",
+            "EST",
+            "ETH",
+            "ZAF",
+            "SSD",
+            "JAM",
+            "JPN"
+          ],
+          "type": "string"
+        },
+        "Address": {
+          "description": "Адрес места жительства",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.ConfirmingStayDocumentContract": {
+      "description": "Документ, подтверждающий право иностранного гражданина на пребывание в РФ",
+      "required": [
+        "DocumentType",
+        "StartDate",
+        "EndDate"
+      ],
+      "type": "object",
+      "properties": {
+        "DocumentType": {
+          "description": "Тип документа",
+          "enum": [
+            "IncorrectValue",
+            "MigrationCard",
+            "ResidencePermit",
+            "TemporaryResidentPermit",
+            "WorkPatent",
+            "Visa",
+            "RefugeeIdentityCard",
+            "RefugeeRecognitionCertificate",
+            "GrantProvisionalAsylumLetter",
+            "CompatriotResettlementLetter"
+          ],
+          "type": "string"
+        },
+        "Series": {
+          "description": "Серия (необязательное)",
+          "type": "string"
+        },
+        "Number": {
+          "description": "Номер",
+          "type": "string"
+        },
+        "StartDate": {
+          "format": "date-time",
+          "description": "Дата начала срока пребывания",
+          "type": "string"
+        },
+        "EndDate": {
+          "format": "date-time",
+          "description": "Дата окончания срока пребывания",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportResultOutContract": {
+      "required": [
+        "Error"
+      ],
+      "type": "object",
+      "properties": {
+        "Error": {
+          "description": "Индикатор ошибки. Если ошибок нет, то возвращает false, иначе true",
+          "type": "boolean"
+        },
+        "Message": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorContract",
+          "description": "Набор сообщений об ошибках"
+        }
+      },
+      "example": {
+        "Error": false,
+        "Message": {
+          "IndividualEntrepreneurErrors": [],
+          "IndividualErrors": [],
+          "LegalEntityErrors": [],
+          "NonResidentLegalEntityErrors": []
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorContract": {
+      "type": "object",
+      "properties": {
+        "IndividualEntrepreneurErrors": {
+          "description": "Ошибки в сегменте данных о бенефициарных владельцах-индивидуальных предпринимателях",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorMessageContract"
+          }
+        },
+        "IndividualErrors": {
+          "description": "Ошибки в сегменте данных о бенефициарных владельцах-физических лицах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorMessageContract"
+          }
+        },
+        "LegalEntityErrors": {
+          "description": "Ошибки в сегменте данных о бенефициарных владельцах-юридических лицах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorMessageContract"
+          }
+        },
+        "NonResidentLegalEntityErrors": {
+          "description": "Ошибки в сегменте данных о бенефициарных владельцах-нерезидентах",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorMessageContract"
+          }
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.BeneficialImportErrorMessageContract": {
+      "required": [
+        "Index"
+      ],
+      "type": "object",
+      "properties": {
+        "Index": {
+          "format": "int32",
+          "description": "Номер ошибки",
+          "type": "integer"
+        },
+        "Errors": {
+          "description": "Текст ошибки",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.SignedDocumentRequest": {
+      "type": "object",
+      "properties": {
+        "Signature": {
+          "description": "Подпись в формате Base64",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.BeneficialFormPartsListResponse": {
+      "type": "object",
+      "properties": {
+        "FormParts": {
+          "description": "Список частей анкет",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.BeneficialFormContract"
+          }
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.Documents.BeneficialFormContract": {
+      "required": [
+        "Id",
+        "IsSigned"
+      ],
+      "type": "object",
+      "properties": {
+        "Id": {
+          "format": "uuid",
+          "description": "Id части анкеты (Guid)",
+          "type": "string",
+          "readOnly": true,
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "IsSigned": {
+          "description": "Признак того, подписана ли анкета",
+          "type": "boolean",
+          "readOnly": true
+        }
+      }
+    },
+    "BusinessLogic.Contracts.BankAccounts.BeneficialOwner.PublicApi.GetReportsResponse": {
+      "required": [
+        "Id"
+      ],
+      "type": "object",
+      "properties": {
+        "Id": {
+          "format": "uuid",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "LinkText": {
+          "type": "string"
+        }
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OAuth.AuthContract": {
+      "type": "object",
+      "properties": {
+        "clientId": {
+          "description": "Идентификатор приложения. Для получения идентификатора для приложения напишите нам на api@modulbank.ru",
+          "type": "string"
+        },
+        "redirectUri": {
+          "description": "URI, на который сервер OAuth передает результат авторизации. Значение этого параметра при посимвольном сравнении должно быть идентично значению redirect_uri, указанному при регистрации приложения. При сравнении не учитываются индивидуальные параметры приложения, которые могут быть добавлены в конец строки URI.",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Список запрашиваемых прав. Разделитель элементов списка — пробел. Элементы списка чувствительны к регистру.",
+          "type": "string"
+        },
+        "state": {
+          "description": "Параметр будет добавлен к redirectUri c тем же значением.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "clientId": "<ключ_приложения>",
+        "redirectUri": "<страница приложения на которую будет отправлен пользователь после авторизации>",
+        "scope": "account-info operation-history assistant-service",
+        "state": "<данные этого параметра будут переданы на url возврата>"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OAuth.TokenRequestContract": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Временный токен (authorization code).",
+          "type": "string"
+        },
+        "clientId": {
+          "description": "Идентификатор приложения, полученный при регистрации.",
+          "type": "string"
+        },
+        "clientSecret": {
+          "description": "Секретное слово для проверки подлинности приложения.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "code": "z43qjxtwwxsvk4cl3vtmvo",
+        "clientId": "<ключ_приложения>",
+        "clientSecret": "секретный_ключ приложения"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OAuth.TokenResponseContract": {
+      "type": "object",
+      "properties": {
+        "accessToken": {
+          "description": "Токен авторизации. Присутствует в случае успеха.",
+          "type": "string"
+        },
+        "error": {
+          "description": "Код ошибки. Присутствует в случае ошибки.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "accessToken": "aWQwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDA3MTQ5M2FhYy1lZTFjLTQ1ZWMtYTZkNC1kNTk4ZTQzM2NjNmY",
+        "error": "<Какая-то ошибка, если таковая есть>"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationHistory.OperationHistoryTransactionsFilter": {
+      "description": "Фильтр по параметрам операций по счёту.",
+      "type": "object",
+      "properties": {
+        "statuses": {
+          "description": "Статусы возвращаемых операций.",
+          "type": "array",
+          "items": {
+            "enum": [
+              "None",
+              "Draft",
+              "InSigning",
+              "Postponed",
+              "SendToBank",
+              "Executed",
+              "RejectByBank",
+              "Canceled",
+              "Received",
+              "Deleted",
+              "Liquidated",
+              "CardIncomingInProgress",
+              "CardInProgress",
+              "ForPayment",
+              "Paid",
+              "Annulled",
+              "Billed",
+              "Exposed",
+              "PayReceived",
+              "BillCancelled",
+              "ClarifyRequiredOutcome",
+              "ClarifyRequiredIncome",
+              "PayrollDraft",
+              "PayrollInSigning",
+              "PayrollSendToBank",
+              "PayrollExecuted",
+              "PayrollRejected",
+              "PayrollPartiallyExecuted",
+              "Scheduled",
+              "UnderControl",
+              "RejectByBeneficiary",
+              "RejectByNominalAccountOwner",
+              "Pending",
+              "NonResidentCurrencyControl"
+            ],
+            "type": "string"
+          }
+        },
+        "SbpRetailPointId": {
+          "format": "uuid",
+          "description": "Необязательный параметр. Идентификатор торговой точки СБП",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "operations": {
+          "description": "Необязательный параметр. Идентификаторы транзакций.",
+          "type": "array",
+          "items": {
+            "format": "uuid",
+            "type": "string",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "AbsIds": {
+          "description": "Необязательный параметр. Идентификаторы АБС транзакций.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "category": {
+          "description": "Необязательный параметр. Направление платежа. Возможные значения: Debet — входящий, Credit — исходящий.",
+          "type": "string"
+        },
+        "from": {
+          "format": "date-time",
+          "description": "Необязательный параметр. Вывести операции от момента времени (операции, дата проведения которых равна from,\r\nили младше). Формат 'yyyy-MM-dd' Если параметр не задан, выводятся все операции.",
+          "type": "string"
+        },
+        "till": {
+          "format": "date-time",
+          "description": "Необязательный параметр. Вывести операции до момента времени (операции, дата проведения которых равна from,\r\nили старше). Формат 'yyyy-MM-dd'. Если параметр не задан, выводятся все операции.",
+          "type": "string"
+        },
+        "skip": {
+          "format": "int32",
+          "description": "Необязательный параметр. Пропустить n строк в выборке. Если параметр не задан, skip = 0.",
+          "type": "integer"
+        },
+        "records": {
+          "format": "int32",
+          "description": "Необязательный параметр. Кол-во возвращаемых записей. От 0 до 50. Если параметр не задан, records = 10.",
+          "type": "integer"
+        }
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationHistory.Transaction": {
+      "description": "Контракт транзакции публичного апи",
+      "required": [
+        "id",
+        "companyId",
+        "status",
+        "category",
+        "contragentName",
+        "contragentInn",
+        "contragentKpp",
+        "contragentBankAccountNumber",
+        "contragentBankCorrAccount",
+        "contragentBankName",
+        "contragentBankBic",
+        "currency",
+        "amount",
+        "bankAccountNumber",
+        "paymentPurpose",
+        "created"
+      ],
+      "type": "object",
+      "properties": {
+        "cardId": {
+          "format": "uuid",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "id": {
+          "format": "uuid",
+          "description": "Системный идентификатор транзакции",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "companyId": {
+          "format": "uuid",
+          "description": "Системный идентификатор компании",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "status": {
+          "description": "Системный стаус транзакции",
+          "type": "string"
+        },
+        "category": {
+          "description": "Направление транзакции",
+          "type": "string"
+        },
+        "contragentName": {
+          "description": "Полное наименование контрагента",
+          "type": "string"
+        },
+        "contragentInn": {
+          "description": "ИНН контрагента",
+          "type": "string"
+        },
+        "contragentKpp": {
+          "description": "КПП контрагента",
+          "type": "string"
+        },
+        "contragentBankAccountNumber": {
+          "description": "Счёт контрагента",
+          "type": "string"
+        },
+        "contragentBankCorrAccount": {
+          "description": "Коррсчёт контрагента",
+          "type": "string"
+        },
+        "contragentBankName": {
+          "description": "Название банка контрагента",
+          "type": "string"
+        },
+        "contragentBankBic": {
+          "description": "БИК банка контрагента. Обязательный (кроме валютных переводов).",
+          "type": "string"
+        },
+        "currency": {
+          "description": "Валюта транзакции",
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "description": "Сумма без комиссии",
+          "type": "number"
+        },
+        "bankAccountNumber": {
+          "description": "Номер счёта организации",
+          "type": "string"
+        },
+        "paymentPurpose": {
+          "description": "Назначение",
+          "type": "string"
+        },
+        "executed": {
+          "format": "date-time",
+          "description": "Дата проведения транзакции",
+          "type": "string"
+        },
+        "created": {
+          "format": "date-time",
+          "description": "Дата создания транзакции",
+          "type": "string"
+        },
+        "docNumber": {
+          "description": "Номер документа",
+          "type": "string"
+        },
+        "absId": {
+          "description": "Идентификатор документа в АБС",
+          "type": "string"
+        },
+        "ibsoId": {
+          "description": "Идентификатор проводки в АБС",
+          "type": "string"
+        },
+        "kbk": {
+          "description": "Код бюджетной классификации (104)",
+          "type": "string"
+        },
+        "oktmo": {
+          "description": "Общероссийский классификатор территорий муниципальных образований (105)",
+          "type": "string"
+        },
+        "paymentBasis": {
+          "description": "Основание платежа (106)",
+          "type": "string"
+        },
+        "taxCode": {
+          "description": "Налоговый период (в случае налогового или бюджетного платежа) | код налогового органа (в случае налогового платежа) (107)",
+          "type": "string"
+        },
+        "taxDocNum": {
+          "description": "Номер документа (108)",
+          "type": "string"
+        },
+        "taxDocDate": {
+          "description": "Дата документа (109)",
+          "type": "string"
+        },
+        "payerStatus": {
+          "description": "Статус плательщика(101)",
+          "type": "string"
+        },
+        "uin": {
+          "description": "Уникальный идентификатор начисления (22)",
+          "type": "string"
+        },
+        "sbpOperId": {
+          "description": "Идентификатор операции в СБП",
+          "type": "string"
+        },
+        "sbpOperIdForRefund": {
+          "description": "Идентификатор операции в СБП, по которой делается возврат",
+          "type": "string"
+        },
+        "rcvQrcId": {
+          "description": "Идентификатор QR кода в СБП",
+          "type": "string"
+        },
+        "sbpRefundId": {
+          "format": "uuid",
+          "description": "Идентификатор QR кода",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "sbpSndPAM": {
+          "description": "Сокращенное ФИО Платильщика\r\n(Иван Иванович И)",
+          "type": "string"
+        },
+        "partialPayAmount": {
+          "format": "double",
+          "description": "В случае оплаты требования по частям - сумма частичных оплат",
+          "type": "number"
+        },
+        "cardNumber": {
+          "description": "Маскированный PAN карты (если есть)",
+          "type": "string"
+        },
+        "Oid": {
+          "description": "Некий внешний идентификатор от внешней же системы. Если есть.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "cardId": "4bdd2fc0-584d-41d8-9241-3f074480fe52",
+        "id": "a4b825ca-a6f8-4996-a1db-a5f3028bb68d",
+        "companyId": "599ebe36-ed20-49c4-b802-a5ec0329ebce",
+        "status": "Received",
+        "category": "Debet",
+        "contragentName": "Индивидуальный предприниматель Иванов Иван Иванович",
+        "contragentInn": "1111111111",
+        "contragentKpp": "",
+        "contragentBankAccountNumber": "30101810000000000005",
+        "contragentBankCorrAccount": "30101810000000000388",
+        "contragentBankName": "МОСКОВСКИЙ ФИЛИАЛ ОАО КБ\"РЕГИОНАЛЬНЫЙ КРЕДИТ\"",
+        "contragentBankBic": "044583340",
+        "currency": "RUR",
+        "amount": 100000.0,
+        "bankAccountNumber": "30101810000000000001",
+        "paymentPurpose": "Оплата по счету №4 от 01.04.2016 г. Без НДС",
+        "executed": "2016-04-01T00:00:00",
+        "created": "2016-04-01T00:00:00",
+        "docNumber": "12345",
+        "absId": "34323454545455",
+        "ibsoId": "1332345565654",
+        "kbk": "",
+        "oktmo": "",
+        "paymentBasis": "",
+        "taxCode": "",
+        "taxDocNum": "",
+        "taxDocDate": "",
+        "payerStatus": "",
+        "uin": "",
+        "sbpOperId": "",
+        "sbpOperIdForRefund": "",
+        "rcvQrcId": "",
+        "sbpRefundId": "00000000-0000-0000-0000-000000000000",
+        "sbpSndPAM": "Иванов П.С.",
+        "partialPayAmount": 45.0,
+        "cardNumber": "123456******1234",
+        "Oid": "12345678-1234-5678-9012-123456789012"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationUpload.OperationJsonUploadRequest": {
+      "type": "object",
+      "properties": {
+        "payment": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.PayformDataContract",
+          "description": "Информация из платёжного поручения."
+        },
+        "parameters": {
+          "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationUpload.OperationUploadWorkflowParameters",
+          "description": "Параметры загрузки платёжного поручения."
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.PayformDataContract": {
+      "required": [
+        "Number",
+        "Sum"
+      ],
+      "type": "object",
+      "properties": {
+        "Number": {
+          "format": "int32",
+          "description": "Номер документа.",
+          "type": "integer"
+        },
+        "Date": {
+          "description": "Дата документа.",
+          "type": "string"
+        },
+        "Sum": {
+          "format": "double",
+          "description": "Сумма платежа.",
+          "type": "number"
+        },
+        "PayerAccount": {
+          "description": "Расчетный счет плательщика.",
+          "type": "string"
+        },
+        "RecipientName": {
+          "description": "Наименование получателя.",
+          "type": "string"
+        },
+        "RecipientINN": {
+          "description": "ИНН получателя.",
+          "type": "string"
+        },
+        "RecipientKPP": {
+          "description": "КПП получателя.",
+          "type": "string"
+        },
+        "RecipientAccount": {
+          "description": "Расчетный счет получателя.",
+          "type": "string"
+        },
+        "RecipientBankBik": {
+          "description": "БИК банка получателя.",
+          "type": "string"
+        },
+        "RecipientBankCorrAccount": {
+          "description": "Корсчет банка получателя.",
+          "type": "string"
+        },
+        "PaymentPurpose": {
+          "description": "Назначение платежа.",
+          "type": "string"
+        },
+        "PayerStatus": {
+          "description": "Статус составителя расчетного документа.",
+          "type": "string"
+        },
+        "KBK": {
+          "description": "Показатель кода бюджетной классификации.",
+          "type": "string"
+        },
+        "OKTMO": {
+          "description": "Код ОКТМО территории, на которой мобилизуются денежные средства от уплаты налога, сбора и иного платежа.",
+          "type": "string"
+        },
+        "PaymentBase": {
+          "description": "Показатель основания налогового платежа.",
+          "type": "string"
+        },
+        "Period": {
+          "description": "Показатель налогового периода / Код таможенного органа.",
+          "type": "string"
+        },
+        "TypeIndicator": {
+          "description": "Уникальный идентификатор платежа.",
+          "type": "string"
+        },
+        "BudgetDocNumber": {
+          "description": "Показатель номера документа",
+          "type": "string"
+        },
+        "BudgetDocDate": {
+          "description": "Показатель даты документа",
+          "type": "string"
+        },
+        "PaymentPurposeCode": {
+          "description": "Назначение платежа кодовое.",
+          "type": "string"
+        },
+        "PayformDataThirdPerson": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.PayformDataThirdPerson",
+          "description": "Оплата налога за 3 лицо"
+        },
+        "PayerInn": {
+          "description": "Только для удержаний из ЗП",
+          "type": "string"
+        }
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationUpload.OperationUploadWorkflowParameters": {
+      "required": [
+        "targetStatus"
+      ],
+      "type": "object",
+      "properties": {
+        "targetStatus": {
+          "description": "Желаемый стaтус размещённой операции. Возможные значения: Draft, InSigning.",
+          "enum": [
+            "None",
+            "Draft",
+            "InSigning",
+            "Postponed",
+            "SendToBank",
+            "Executed",
+            "RejectByBank",
+            "Canceled",
+            "Received",
+            "Deleted",
+            "Liquidated",
+            "CardIncomingInProgress",
+            "CardInProgress",
+            "ForPayment",
+            "Paid",
+            "Annulled",
+            "Billed",
+            "Exposed",
+            "PayReceived",
+            "BillCancelled",
+            "ClarifyRequiredOutcome",
+            "ClarifyRequiredIncome",
+            "PayrollDraft",
+            "PayrollInSigning",
+            "PayrollSendToBank",
+            "PayrollExecuted",
+            "PayrollRejected",
+            "PayrollPartiallyExecuted",
+            "Scheduled",
+            "UnderControl",
+            "RejectByBeneficiary",
+            "RejectByNominalAccountOwner",
+            "Pending",
+            "NonResidentCurrencyControl"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.PayformDataThirdPerson": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "description": "Наименование или Ф.И.О третьего лица",
+          "type": "string"
+        },
+        "Inn": {
+          "description": "ИНН третьего лица",
+          "type": "string"
+        },
+        "Kpp": {
+          "description": "КПП третьего лица",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.UploadPaymentResponseContract": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "format": "uuid",
+          "description": "Id созданной операции.",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "Error": {
+          "description": "Текст ошибки.",
+          "type": "string"
+        }
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationUpload.Operation1CUploadRequest": {
+      "required": [
+        "document"
+      ],
+      "type": "object",
+      "properties": {
+        "document": {
+          "description": "Платежные поручения в формате 1С",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/definitions/StorageServices.Contracts.PublicApi.OperationUpload.OperationUploadWorkflowParameters",
+          "description": "Параметры загрузки платёжного поручения."
+        }
+      },
+      "example": {
+        "document": "Смотреть пример"
+      }
+    },
+    "StorageServices.Contracts.PublicApi.OperationUpload.OperationUploadResponse": {
+      "required": [
+        "totalLoaded"
+      ],
+      "type": "object",
+      "properties": {
+        "totalLoaded": {
+          "format": "int32",
+          "description": "Количество успешно созданных операций.",
+          "type": "integer"
+        },
+        "errors": {
+          "description": "Список ошибок.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transactions": {
+          "description": "Список, содержащий номера платёжных поручений из документа и Id созданных операций соответствующих им.",
+          "type": "object",
+          "additionalProperties": {
+            "format": "uuid",
+            "type": "string",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        }
+      },
+      "example": {
+        "totalLoaded": 2,
+        "errors": [
+          "Документ 11 от 11.08.2016 на сумму 15000 рублей . Ошибка: Неверное значение поля ПлательщикБИК"
+        ],
+        "transactions": {
+          "994720": "273213a6-738d-4b06-bdc8-10896bc5c25e",
+          "994721": "e58cedc8-7978-4d1c-a9ff-88b88ed1ae3c"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.DigitalSign.SignRequestContract": {
+      "type": "object",
+      "properties": {
+        "Operations": {
+          "description": "Список id подписываемых транзакций.",
+          "type": "array",
+          "items": {
+            "format": "uuid",
+            "type": "string",
+            "example": "00000000-0000-0000-0000-000000000000"
+          }
+        },
+        "SignBase64": {
+          "description": "Подпись транзакции.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "Operations": [
+          "fa74a744-6aa9-436f-8f3c-e29a058999c0",
+          "9c6f2638-e556-4fa3-b59d-fbb1ff2a8f6c"
+        ],
+        "SignBase64": "dGVzdHNpZ24="
+      }
+    },
+    "BusinessLogic.Contracts.DigitalSign.SignResponseContract": {
+      "type": "object",
+      "properties": {
+        "SignedResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.DigitalSign.SignOperationsResult"
+          }
+        }
+      },
+      "example": {
+        "SignedResults": [
+          {
+            "Id": "7872b839-8b0d-4d83-83ee-0697292f5eee",
+            "Status": "Signed",
+            "Message": "OK"
+          },
+          {
+            "Id": "36f99f92-e45f-4e88-b374-c5aa471856b7",
+            "Status": "Error",
+            "Message": "NotFound"
+          }
+        ]
+      }
+    },
+    "BusinessLogic.Contracts.DigitalSign.SignOperationsResult": {
+      "required": [
+        "Id",
+        "Status"
+      ],
+      "type": "object",
+      "properties": {
+        "Id": {
+          "format": "uuid",
+          "description": "Id платежа",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "Status": {
+          "description": "Статус подписания платежа",
+          "enum": [
+            "Signed",
+            "Error"
+          ],
+          "type": "string"
+        },
+        "Message": {
+          "description": "Описание статуса платежа",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpRetailPointsResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "description": "ID торговой точки",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "name": {
+          "description": "Название торговой точки",
+          "type": "string"
+        },
+        "phone": {
+          "description": "Контактный телефон",
+          "type": "string"
+        },
+        "city": {
+          "description": "Город регистрации торговой точки",
+          "type": "string"
+        },
+        "zip": {
+          "description": "Индекс города регистрации торговой точки",
+          "type": "string"
+        },
+        "address": {
+          "description": "Фактический адрес ТСП",
+          "type": "string"
+        },
+        "type": {
+          "description": "Тип торговой точки",
+          "type": "string"
+        },
+        "siteUrl": {
+          "description": "Сайт",
+          "type": "string"
+        },
+        "created": {
+          "format": "date-time",
+          "description": "Дата создания торговой точки",
+          "type": "string"
+        },
+        "hasStaticQrCode": {
+          "description": "Имеет статический QR-код",
+          "type": "boolean"
+        },
+        "binded": {
+          "description": "Привязан к приложению QRPay",
+          "type": "boolean"
+        },
+        "activationCode": {
+          "description": "Код активации в QRPay приложении",
+          "type": "string"
+        },
+        "merchantCategoryCode": {
+          "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpMerchantCategoryCode",
+          "description": "Код вида деятельности"
+        },
+        "bankAccount": {
+          "description": "Номер счёта получателя платежей",
+          "type": "string"
+        },
+        "status": {
+          "description": "Статус",
+          "type": "string"
+        }
+      },
+      "example": {
+        "id": "bbdf834b-d68a-443d-ad5b-9cc00a0e07e9",
+        "name": "Продажа банковских карт",
+        "phone": "79991234567",
+        "city": "Москва",
+        "zip": "115184",
+        "address": "Татарская улица д. 11",
+        "type": "QRPay",
+        "siteUrl": "example.com",
+        "created": "2021-03-18T12:24:38.604538",
+        "hasStaticQrCode": true,
+        "activationCode": "65719916",
+        "merchantCategoryCode": {
+          "code": "5533",
+          "name": "Автомобильные запчасти и аксессуары",
+          "category": "Автотовары и услуги"
+        },
+        "bankAccount": "40702810250011001666",
+        "status": "New"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpMerchantCategoryCode": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Код вида деятельности (MCC)",
+          "type": "string"
+        },
+        "name": {
+          "description": "Наименование вида деятельности",
+          "type": "string"
+        },
+        "category": {
+          "description": "Категория вида деятельности",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpCreateRetailPointRequest": {
+      "type": "object",
+      "properties": {
+        "companyId": {
+          "format": "uuid",
+          "description": "ID компании",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "bankAccountNumber": {
+          "description": "Номер счёта получателя платежей",
+          "type": "string"
+        },
+        "name": {
+          "description": "Название торговой точки",
+          "type": "string"
+        },
+        "mcc": {
+          "description": "МСС код",
+          "type": "string"
+        },
+        "countryCode": {
+          "description": "Код страны-регистрации юридического лица",
+          "type": "string"
+        },
+        "countrySubDivisionCode": {
+          "description": "Регион",
+          "type": "string"
+        },
+        "city": {
+          "description": "Город регистрации торговой точки",
+          "type": "string"
+        },
+        "zip": {
+          "description": "Индекс города регистрации торговой точки",
+          "type": "string"
+        },
+        "address": {
+          "description": "Фактический адрес ТСП",
+          "type": "string"
+        },
+        "phone": {
+          "description": "Контактный телефон",
+          "type": "string"
+        },
+        "monthlyTurnover": {
+          "format": "double",
+          "description": "Ежемесячный оборот",
+          "type": "number"
+        },
+        "qrcExpDt": {
+          "format": "int32",
+          "description": "Время жизни QR-кода по-умолчанию",
+          "type": "integer"
+        }
+      },
+      "example": {
+        "companyId": "09ed9631-ca26-4495-9fd2-09ca4dbf5ded",
+        "bankAccountNumber": "40702810250011001666",
+        "name": "Продажа банковских карт",
+        "mcc": "5533",
+        "countryCode": "RU",
+        "countrySubDivisionCode": "45",
+        "city": "Москва",
+        "zip": "115184",
+        "address": "Татарская улица д. 11",
+        "phone": "79991234567",
+        "monthlyTurnover": 10000.0
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpCreateRetailPointResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "format": "uuid",
+          "description": "ID запроса",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "retailPointId": {
+          "format": "uuid",
+          "description": "ID торговой точки",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "example": {
+        "requestId": "47547e4e-3748-47cf-b713-612c29a5c98f",
+        "retailPointId": "bbdf834b-d68a-443d-ad5b-9cc00a0e07e9"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpRetailPointStatusResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "description": "ID торговой точки",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "status": {
+          "description": "Статус",
+          "type": "string"
+        }
+      },
+      "example": {
+        "id": "bbdf834b-d68a-443d-ad5b-9cc00a0e07e9",
+        "status": "Created"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiGetQrCodeResponse": {
+      "type": "object",
+      "properties": {
+        "qrcId": {
+          "description": "ID QR-кода (далее QrcId)",
+          "type": "string"
+        },
+        "localQrcId": {
+          "description": "Внутренний ID (однозначно связан с QrcId), предназначен для операций возврата, где UI с клиентом не позволяет ввести исходный длинный QrcId (например, только цифровая клавиатура)",
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "description": "Сумма платежа",
+          "type": "number"
+        },
+        "payload": {
+          "type": "string"
+        },
+        "created": {
+          "format": "date-time",
+          "description": "Дата создания QR-кода",
+          "type": "string"
+        },
+        "operationId": {
+          "description": "Номер операции в СБП, назначается при успешной оплате",
+          "type": "string"
+        },
+        "type": {
+          "description": "Тип QR-кода (QRS|QRD - static/dynamic)",
+          "type": "string"
+        },
+        "status": {
+          "description": "Статус платежа",
+          "type": "string"
+        },
+        "paymentPurpose": {
+          "description": "Назначение платежа/описание/и т.п.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "qrcId": "AD10002AO71M5BPV96LOCN7B315SBFAG",
+        "localQrcId": "9976",
+        "amount": 50800.0,
+        "payload": "https://qr.nspk.ru/AD10002AO71M5BPV96LOCN7B315SBFAG?type=02&bank=100000000099&sum=5080000&cur=RUB&crc=565A",
+        "created": "2021-03-18T12:24:38.604538",
+        "operationId": "A931608381015300KXVWKp1837BE5609",
+        "type": "QRD",
+        "status": "Accepted",
+        "paymentPurpose": "Оплата по заказу №512"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiCreateDynamicQrCodeRequest": {
+      "type": "object",
+      "properties": {
+        "retailPointId": {
+          "format": "uuid",
+          "description": "ID торговой точки из предыдущего запроса",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "sum": {
+          "format": "double",
+          "description": "Сумма платежа (от 0 до 1000000000)",
+          "type": "number"
+        },
+        "extraInfo": {
+          "description": "Назначение платежа/описание/и т.п. (обязательное, макс. 140 символов)",
+          "type": "string"
+        },
+        "lifetime": {
+          "format": "int32",
+          "description": "Целочисленное, необязательное, в минутах. Минимальное допустимое значение — 5, максимальное — 129600 (90 дней), если значение не задано — 12 минут",
+          "type": "integer"
+        },
+        "redirectUrl": {
+          "description": "Содержит ссылку для автоматического возврата Плательщика из приложения Банка в приложение или на сайт ТСП. Допускаются только символы в кодировке ASCII. Формат должен соответствовать правилам кодировки URL. (Не более 1024 символов)",
+          "type": "string"
+        }
+      },
+      "example": {
+        "retailPointId": "bbdf834b-d68a-443d-ad5b-9cc00a0e07e9",
+        "sum": 50800.0,
+        "extraInfo": "Оплата по заказу №512",
+        "lifetime": 12,
+        "redirectUrl": "https://example.ru/"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiCreateDynamicQrCodeResponse": {
+      "type": "object",
+      "properties": {
+        "qrcId": {
+          "description": "ID QR-кода (далее QrcId)",
+          "type": "string"
+        },
+        "payload": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "qrcId": "AD10002AO71M5BPV96LOCN7B315SBFAG",
+        "payload": "https://qr.nspk.ru/AD10002AO71M5BPV96LOCN7B315SBFAG?type=02&bank=100000000099&sum=5080000&cur=RUB&crc=565A"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiRefundQrCodeRequest": {
+      "type": "object",
+      "properties": {
+        "sbpOperId": {
+          "description": "Номер операции СБП, по которой необходимо выполнить возврат средств",
+          "type": "string"
+        },
+        "type": {
+          "description": "Необязательный. Тип возврата, полный или частичный (full, partial)",
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "description": "Необязательный. Сумма для частичного возврата",
+          "type": "number"
+        },
+        "remitInfo": {
+          "description": "Необязательный. Причина возврата, максимальная длина 140 символов",
+          "type": "string"
+        }
+      },
+      "example": {
+        "sbpOperId": "A931608381015300KXVWKp1837BE5609",
+        "type": "full",
+        "remitInfo": "Возврат по заказу №512"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiRefundQrCodeResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "format": "uuid",
+          "description": "ID возврата",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "example": {
+        "requestId": "13a8804e-ded0-4f29-a231-725ffce47859"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiGetRefundResponse": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "format": "uuid",
+          "description": "ID возврата",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "qrcId": {
+          "description": "Номер QR кода СБП",
+          "type": "string"
+        },
+        "sbpOperId": {
+          "description": "Номер исходной операции СБП",
+          "type": "string"
+        },
+        "refundSbpOperId": {
+          "description": "Номер операции возврата СБП",
+          "type": "string"
+        },
+        "amount": {
+          "format": "double",
+          "description": "Сумма возврата",
+          "type": "number"
+        },
+        "status": {
+          "description": "Статус возврата",
+          "type": "string"
+        }
+      },
+      "example": {
+        "requestId": "13a8804e-ded0-4f29-a231-725ffce47859",
+        "qrcId": "AD10002AO71M5BPV96LOCN7B315SBFAG",
+        "sbpOperId": "A931608381015300KXVWKp1837BE5609",
+        "refundSbpOperId": "A931608381015300KXVWKp1837BE5609",
+        "amount": 50800.0,
+        "status": "Executed"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiSbpGetMccResponse": {
+      "type": "object",
+      "properties": {
+        "codes": {
+          "description": "Коды категорий",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessLogic.Contracts.PublicApi.Sbp.PublicApiMccCodeContract"
+          }
+        }
+      },
+      "example": {
+        "codes": [
+          {
+            "name": "Генеральные подрядчики - строительство жилых и коммерческих зданий",
+            "category": "Строительство и ремонт",
+            "code": "1520"
+          },
+          {
+            "name": "Разнообразные издательства/печатное дело",
+            "category": "Книги",
+            "code": "2741"
+          },
+          {
+            "name": "Грузовые железнодорожные перевозки",
+            "category": "Перевозки",
+            "code": "4011"
+          }
+        ]
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.PublicApiMccCodeContract": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Наименование",
+          "type": "string"
+        },
+        "category": {
+          "description": "Категория",
+          "type": "string"
+        },
+        "code": {
+          "description": "Код",
+          "type": "string"
+        }
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiRegisterCashLinkRequest": {
+      "type": "object",
+      "properties": {
+        "retailPointId": {
+          "format": "uuid",
+          "description": "ID торговой точки",
+          "type": "string",
+          "example": "00000000-0000-0000-0000-000000000000"
+        },
+        "redirectUrl": {
+          "description": "Ссылка для автоматического возврата Плательщика из приложения Банка в приложение или на сайт ТСП. Допускаются только символы в кодировке ASCII. Формат должен соответствовать спецификации RFC-3986.",
+          "type": "string"
+        }
+      },
+      "example": {
+        "retailPointId": "bbdf834b-d68a-443d-ad5b-9cc00a0e07e9",
+        "redirectUrl": "https://example.ru/"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLink": {
+      "type": "object",
+      "properties": {
+        "paramsId": {
+          "description": "Идентификатор активных значений параметров Кассовой ссылки СБП",
+          "type": "string"
+        },
+        "qrcId": {
+          "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+          "type": "string"
+        },
+        "payload": {
+          "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+          "type": "string"
+        },
+        "status": {
+          "description": "Статус Кассовой ссылки СБП",
+          "enum": [
+            "InActivated",
+            "WaitingPayment",
+            "InProgress"
+          ],
+          "type": "string"
+        }
+      },
+      "example": {
+        "paramsId": "AP10002T9B5ONF23912RQ61TLRF0ICA8",
+        "qrcId": "AS1R000D4IES04TS9B289G3MUGQ4F2BI",
+        "payload": "https://qr.nspk.ru/AS1R000D4IES04TS9B289G3MUGQ4F2BI?type=01&bank=100000000099&crc=E646",
+        "status": "InActivated"
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiActivateCashLinkRequest": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "format": "double",
+          "description": "Сумма Операции СБП C2B",
+          "type": "number"
+        },
+        "paymentPurpose": {
+          "description": "Назначение платежа",
+          "type": "string"
+        },
+        "lifetime": {
+          "format": "int32",
+          "description": "Период использования Кассовой ссылки в минутах. Необязательное поле. Минимальное допустимое значение - 1. Максимальное допустимое значение - 20. Если поле \"Lifetime\" не передано в запросе метода \"Активация Кассовой ссылки\", то за период использования Кассовой ссылки берется значение по умолчанию – 5 минут.",
+          "type": "integer"
+        }
+      },
+      "example": {
+        "amount": 100.0,
+        "paymentPurpose": "Оплата по заказу №513",
+        "lifetime": 5
+      }
+    },
+    "BusinessLogic.Contracts.PublicApi.Sbp.CashLinks.PublicApiCashLinkOperation": {
+      "type": "object",
+      "properties": {
+        "paramsId": {
+          "description": "Идентификатор активных значений параметров Кассовой ссылки СБП",
+          "type": "string"
+        },
+        "qrcId": {
+          "description": "Идентификатор зарегистрированной Кассовой ссылки СБП",
+          "type": "string"
+        },
+        "status": {
+          "description": "Статус операции по Кассовой ссылке",
+          "enum": [
+            "NotStarted",
+            "Received",
+            "InProgress",
+            "Accepted",
+            "Rejected",
+            "TimedOut",
+            "Error"
+          ],
+          "type": "string"
+        },
+        "trxId": {
+          "description": "Идентификатор Операции СБП C2B",
+          "type": "string"
+        },
+        "lifetime": {
+          "format": "int32",
+          "description": "Период использования Кассовой ссылки в минутах. Необязательное поле. Минимальное допустимое значение - 1. Максимальное допустимое значение - 20. Если поле \"qrTtl\" не передано в запросе метода \"Активация Кассовой ссылки\", то за период использования Кассовой ссылки берется значение по умолчанию – 5 минут.",
+          "type": "integer"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "description": "Дата и время выполнения Операции СБП C2B",
+          "type": "string"
+        }
+      },
+      "example": {
+        "paramsId": "AP10002T9B5ONF23912RQ61TLRF0ICA8",
+        "qrcId": "AS1R000D4IES04TS9B289G3MUGQ4F2BI",
+        "status": "NotStarted",
+        "trxId": "A931608381015300KXVWKp1837BE5609",
+        "lifetime": 5,
+        "timestamp": "2021-03-18T12:24:38.604538"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Как подключить сервис для бизнеса по API",
+      "description": "\r\n<ol><li>В личном кабинете банка в меню \"+\" выберите \"Интеграция с банком\"</li><br/>\r\n<li>Сгенерируйте токен и воспользуйтесь описанием API</li></ol>\r\nЕсли у вас ещё нет учетной записи в Модульбанке или вы хотите опробовать протокол, можете воспользоваться песочницей\r\n<video src=\"https://modulbank.ru/files/marketingApi/video-api.mp4\" controls width=\"100%\"></video>"
+    },
+    {
+      "name": "Авторизация и аутентификация",
+      "description": "Получить токен авторизации можно двумя способами: <b>сгенерировать его в ЛК Модульбанка</b> или <b>получить по протоколу OAuth 2</b>.<br/><br/>\r\n<b>Генерация токена в ЛК</b><br/><br/>\r\nЕсли вы хотите получать от API данные исключительно по свой учетной записи в Модульбанке, воспользуйтесь механизмом получения токена в Личном кабинете. Выберите пункт «Подключиться к API» в меню действий ЛК и следуйте дальнейшим инструкциям.<br/><br/>\r\n<b>Важно!Полученный токен привязан к вашей учетной записи в ЛК и не должен передаваться третьим лицам!</b><br/><br/>\r\nПосле генерации токена вы можете сразу начать его использование для получения данных в API.<br/><br/>\r\n<b>OAuth 2. Общая схема работы</b><br/><br/>\r\nЕсли вы разрабатываете приложение (бот для телеграма, плагин для общедоступной CRM и т.д.), которое может быть полезно для любого пользователя Модульбанка, вы можете авторизовывать пользователей через сервер авторизации Модульбанка по OAuth подобному протоколу. Схема авторизации пользователей идентична протоколу OAuth 2.0, за небольшим исключением что сервер авторизации Модульбанка кроме формата x-www-form-urlencoded также поддерживает формат json в теле запроса. Для того чтобы стороннее приложение могло совершать запросы к API от лица конкретного пользователя, приложению необходимо получить токен авторизации, подтверждающий что пользователь предоставил приложению права на выполнение тех или иных действий.<br/><br/>\r\n<b>Важно!Если вы хотите авторизовывать пользователей Модульбанка по протоколу OAuth, ваше приложение должно быть зарегистрировано у нас. Для регистрации приложения напишите нам письмо на api@modulbank.ru. В ответ мы вышлем вам `clientId` и `clientSecret` — уникальные для каждого приложения идентификатор и секретное слово (необходимые параметры для взаимодействия с сервером авторизации Модульбанка).<br/><br/>\r\nСхема получения токена авторизации пользователя сторонним приложением.</b><br/>\r\n![](https://modulbank.ru/fs/files/marketingApi/token-scheme.jpg)<br/><br/>\r\n<ol><li>Пользователь инициирует авторизацию стороннего приложения.</li><br/>\r\n<li>Приложение отправляет запрос Authorization Request на сервер авторизации Модульбанка.</li><br/>\r\n<li>Сервер авторизации Модульбанка перенаправляет пользователя на страницу авторизации.</li><br/>\r\n<li>Пользователь вводит свой логин и пароль, просматривает список запрашиваемых прав и подтверждает, либо отклоняет запрос авторизации.</li><br/>\r\n<li>Приложение получает ответ Authorization Response в виде HTTP Redirect со временным токеном для получения доступа или кодом ошибки.</li><br/>\r\n<li>Приложение, используя полученный временный токен доступа, отправляет запрос на получение токена авторизации.</li><br/>\r\n<li>Ответ содержит токен авторизации (<b>access_token</b>).</li></ol><br/><br/>\r\n<b>Права на выполнение операций</b><br/><br/>\r\nПри запросе авторизации стороннее приложение должно явно указывать в параметре scope набор прав, необходимых приложению для работы.<br/><br/>\r\n<b>Список возможных прав:</b><br/>\r\n<table><thead><tr><th>Название права</th><th>Описание</th></tr></thead><tbody><tr><td>account-info</td><td>Получение информации о компаниях пользователя (один и тот же клиент Модульбанка может быть сотрудником нескольких компаний) и счетах компаний пользователя</td></tr><tr><td>operation-history</td><td>Просмотр истории операций</td></tr><tr><td>operation-upload</td><td>Загрузка операций в ЛК</td></tr></tbody></table>"
+    },
+    {
+      "name": "Получение данных",
+      "description": "Методы для получения информации по счетам и операциям."
+    },
+    {
+      "name": "Уведомления о произошедших транзакциях (веб-хуки)",
+      "description": "<b>Описание</b><br/>\r\nПри появлении новой исполненной транзакции в Модульбанке, вашему приложению будет отправлено уведомление. Уведомление — это http запрос, выполненный на специальный, указанный при регистрации приложения Uri для уведомлений.<br/><br/>\r\n<b>Требуемые права токена</b><br/>`operation-history`<br/><br/>\r\n<b>Пример</b><br/>При регистрации в качестве Uri для уведомлений был указан адрес https://example.ru/modulbank/. Стороннее приложение авторизовало пользователя, работающего в ИП Иванов Иван Иванович. При появлении новой исполненной транзакции по счету открытому ИП Иванов Иван Иванович, Модульбанк выполнит следующий POST запрос:<br/>\r\n<code>\r\n    <b>POST /modulbank<br/>\r\n\tHost: example.ru<br/>\r\n\tContent-Type: application/json</b><br/>\r\n\t{<br/>\r\n\t\t\"companyInn\": \"1111111111\",<br/>\r\n\t\t\"companyKpp\": \"\",<br/>\r\n        \"operation\":<br/>\r\n            {<br/>\r\n                \"id\":\"a4b825ca-a6f8-4996-a1db-a5f3028bb68d\",<br/>\r\n                \"companyId\":\"599ebe36-ed20-49c4-b802-a5ec0329ebce\",<br/>\r\n                \"status\":\"Received\",<br/>\r\n                \"category\":\"Debet\",<br/>\r\n                \"contragentName\":\"Индивидуальный предприниматель Иванов Иван Иванович\",<br/>\r\n                \"contragentInn\":\"1111111111\",<br/>\r\n                \"contragentKpp\":\"\",<br/>\r\n                \"contragentBankAccountNumber\":\"30101810000000000005\",<br/>\r\n                \"contragentBankName\":\"МОСКОВСКИЙ ФИЛИАЛ ОАО КБ\\\"РЕГИОНАЛЬНЫЙ КРЕДИТ\\\",<br/>\r\n                \"contragentBankBic\":\"044583340\",<br/>\r\n                \"currency\":\"RUR\",<br/>\r\n                \"amount\":100000.0,<br/>\r\n                \"bankAccountNumber\":\"30101810000000000001\",<br/>\r\n                \"paymentPurpose\":\"Оплата по счету №4 от 01.04.2016 г. Без НДС\",<br/>\r\n                \"executed\":\"2016-04-01T00:00:00\",<br/>\r\n                \"created\":\"2016-04-01T00:00:00\",<br/>\r\n                \"docNumber\":\"4\",<br/>\r\n                \"kbk\":\"\",<br/>\r\n                \"oktmo\":\"\",<br/>\r\n                \"paymentBasis\":\"\",<br/>\r\n                \"taxCode\":\"\",<br/>\r\n                \"taxDocNum\":\"\",<br/>\r\n                \"taxDocDate\":\"\",<br/>\r\n                \"payerStatus\":\"\",<br/>\r\n                \"uin\":\"\",<br/>\r\n                \"absId\":\"34323454545455\",<br/>\r\n                \"ibsoId\":\"1332345565654\",<br/>\r\n                \"cardId\":\"4bdd2fc0-584d-41d8-9241-3f074480fe52\"<br/>\r\n        },<br/>\r\n        \"SHA1Hash\": \"b2ee4a9197f4a90e893caa4f62eeba0b579321f8\"<br/>\r\n    }<br/>\r\n</code><br/><br/>\r\n<b>Важно! Все уведомления отправляются исключительно по протоколу HTTPS</b><br/><br/>\r\nВ теле запроса передается информация о произошедшей транзакции в виде JSON объекта.<br/><br/>\r\nОписание полей объекта:<br/>\r\n<table>\r\n<thead>\r\n<tr><th>Параметр</th><th>Тип</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>companyInn</td><td>string</td><td>ИНН компании (для которой в Модульбанке появилась транзакция)</td></tr>\r\n<tr><td>companyKpp</td><td>string</td><td>КПП компании (для которой в Модульбанке появилась транзакция)</td></tr>\r\n<tr><td>operation</td><td>object</td><td>Информация по транзакции</td></tr>\r\n<tr><td>SHA1Hash</td><td>string</td><td>Подпись сообщения, гарантирующая целостность данных уведомления и то, что уведомления были отправлены сервером Модульбанка. Информация о том как проверить SHA1Hash на стороне приложения описана чуть ниже</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\nОбъект operation имеет следующий набор полей:<br/>\r\n<table>\r\n<thead>\r\n<tr><th>Параметр</th><th>Тип</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>id</td><td>string</td><td>Системный идентификатор транзакции</td></tr>\r\n<tr><td>companyId</td><td>string</td><td>Системный идентификатор компании</td></tr>\r\n<tr><td>status</td><td>string</td><td>Текущий статус транзакции. Возможные значения: Draft (Черновик), SendToBank (Ожидающая исполнения), Executed (Исполненная), RejectByBank (Отказано банком в исполнении), Canceled (Отменённая), Received (Исполненная), PayReceived (Исполненная (Оплачено)), ClarifyRequiredOutcome (Требует уточнения)</td></tr>\r\n<tr><td>category</td><td>string</td><td>Направление платежа. Возможные значения: Debet (входящая), Credit (исходящая)</td></tr>\r\n<tr><td>contragentName</td><td>string</td><td>Полное наименование контрагента</td></tr>\r\n<tr><td>contragentInn</td><td>string</td><td>ИНН контрагента</td></tr>\r\n<tr><td>contragentKpp</td><td>string</td><td>КПП контрагента</td></tr>\r\n<tr><td>contragentBankAccountNumber</td><td>string</td><td>Счёт контрагента</td></tr>\r\n<tr><td>contragentBankCorrAccount</td><td>string</td><td>Коррсчёт контрагента</td></tr>\r\n<tr><td>contragentBankName</td><td>string</td><td>Наименование банка контрагента</td></tr>\r\n<tr><td>contragentBankBic</td><td>string</td><td>БИК банка контрагента</td></tr>\r\n<tr><td>currency</td><td>string</td><td>Код валюты. Возможные значения: RUR, EUR, USD, CNY</td></tr>\r\n<tr><td>amount</td><td>number</td><td>Сумма платежа без учета банковской комиссии</td></tr>\r\n<tr><td>bankAccountNumber</td><td>string</td><td>Номер банковского счета</td></tr>\r\n<tr><td>paymentPurpose</td><td>string</td><td>Назначение платежа</td></tr>\r\n<tr><td>executed</td><td>string</td><td>Дата проведения платежа</td></tr>\r\n<tr><td>created</td><td>string</td><td>Дата создания транзакции</td></tr>\r\n<tr><td>docNumber</td><td>string</td><td>Номер документа</td></tr>\r\n<tr><td>absId</td><td>string</td><td>Идентификатор документа в АБС</td></tr>\r\n<tr><td>ibsoId</td><td>string</td><td>Идентификатор проводки в АБС</td></tr>\r\n<tr><td>kbk</td><td>string</td><td>Для бюджетных и налоговых платежей. Код бюджетной классификации (104)</td></tr>\r\n<tr><td>oktmo</td><td>string</td><td>Для бюджетных и налоговых платежей. Общероссийский классификатор территорий муниципальных образований (105)</td></tr>\r\n<tr><td>paymentBasis</td><td>string</td><td>Для бюджетных и налоговых платежей. Основание платежа (106)</td></tr>\r\n<tr><td>taxCode</td><td>string</td><td>Для бюджетных и налоговых платежей. Налоговый период (в случае налогового или бюджетного платежа)</td></tr>\r\n<tr><td>taxDocNum</td><td>string</td><td>Для бюджетных и налоговых платежей. Номер документа (108)</td></tr>\r\n<tr><td>taxDocDate</td><td>string</td><td>Для бюджетных и налоговых платежей. Дата документа (109)</td></tr>\r\n<tr><td>payerStatus</td><td>string</td><td>Для бюджетных и налоговых платежей. Статус плательщика (101)</td></tr>\r\n<tr><td>uin</td><td>string</td><td>Для бюджетных и налоговых платежей. Уникальный идентификатор начисления (22)</td></tr>\r\n<tr><td>cardId</td><td>string</td><td>Идентификатор карты, к которой привязан платёж</td></tr>\r\n<tr><td>sbpOperId</td><td>string</td><td>ID операций C2B платежа по СБП</td></tr>\r\n<tr><td>sbpOperIdForRefund</td><td>string</td><td>ID операции возврата С2B платежa</td></tr>\r\n<tr><td>rcvQrcId</td><td>string</td><td>ID QR-кода СБП</td></tr>\r\n<tr><td>sbpRefundId</td><td>string</td><td>Идентификатор возврата платежа по QR коду</td></tr>\r\n<tr><td>partialPayAmount</td><td>decimal</td><td>В случае оплаты требования по частям - сумма частичных оплат</td></tr>\r\n<tr><td>cardNumber</td><td>string</td><td>Маскированный PAN карты (если есть)</td></tr>\r\n<tr><td>Oid</td><td>string</td><td>Некий внешний идентификатор от внешней системы (если есть)</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\nПри получении от приложения ответа с кодом http статуса 200, уведомление считается полученным. В случае отказа Модульбанк предпримет еще две попытки доставить уведомление: через 10 минут и через час.<br/><br/>\r\n<b>Алгоритм расчета подписи сообщения в случае если токен был сгенерирован в ЛК Модульбанка</b><br/><br/>\r\n<ol><li>Сформировать строку из параметров уведомления в кодировке UTF-8.<br/>Формат строки:<br/><code><первые 10 символов токена авторизации>&operationId</code><br/>Пример строки параметров для токена <code>NDIWJFNASDJKFHNASDJFASDJKFHASDJKFHASDJFHASDK</code>:<br/>\r\n<code>NDIWJFNASD&a4b825ca-a6f8-4996-a1db-a5f3028bb68d</code></li><br/>\r\n<li>Вычислить значение хэш-функции SHA-1 от полученной строки.</li><br/>\r\n<li>Отформатировать полученный результат в HEX-кодированном виде.<br/>\r\nПример рассчитанного значения параметра sha1_hash для примера:<br/><code>27063efdefd944907e08cfa242170f4d1a260c36</code></li></ol><br/><br/>\r\n<b>Алгоритм расчета подписи сообщения в случае если токен был получен по протоколу OAuth</b><br/><br/>\r\n<ol><li>Сформировать строку из параметров уведомления в кодировке UTF-8 (где clientSecret — это секретное слово приложения).\r\n<br/>Формат строки:<br/>\r\n<code>clientSecret&operationId</code><br/>Пример строки параметров:<br/>\r\n<code>JSADFJASFJASLKJWERMNGIODVBKLMNEWSTOHEJLWRTFNEHNSDJLFHNWEO&a4b825ca-a6f8-4996-a1db-a5f3028bb68d</code></li><br/>\r\n<li>Вычислить значение хэш-функции SHA-1 от полученной строки.</li><br/>\r\n<li>Отформатировать полученный результат в HEX-кодированном виде.<br/>\r\nПример рассчитанного значения параметра sha1_hash для примера:<br/><code>f232c33785c13009614a7ddb69f12133300a33c8</code></li></ol><br/><br/>"
+    },
+    {
+      "name": "Загрузка данных",
+      "description": "Методы по созданию и подписанию платежей.<br/><br/>\r\n<b>Идемпотентность платежей</b><br/><br/>\r\n<ol><li>Ключ идемпотентности опционален к заполнению, можно указывать в запросе в виде query-параметра, например: https://api.modulbank.ru/v1/operation-upload?idempotency-key=&lt;UUID&gt; или в header-параметрах: Idempotency-Key &lt;UUID&gt;</li><br/>\r\n<li>Валидации: при указании ключ идемпотентности не должен быть пустым, может содержать до 256 символов - латиница, цифры, дефис</li><br/>\r\n<li>При получении запроса operation-upload с Idempotency-Key, сервис проверит, была ли ранее создана операция с таким UUID. Если операция была создана, сервер вернет ответ с текущим Id этой операции. Если операции с таким UUID не найдено, сервис начнет ее выполнение</li></ol>"
+    },
+    {
+      "name": "QR Pay",
+      "description": "<b>API QR Pay (PortalAPI/SBP)</b><br/><br/>Режим песочницы недоступен для методов QR Pay. Рекомендуется проводить тестирование на бою малыми суммами. По динамическим QR-кодам возможен возврат платежа.<br/><br/>\r\n<b>Базовый адрес</b><br/>https://api.modulbank.ru/v1/<br/><br/>\r\n<b>Авторизация</b><br/>Смотрите раздел получение данных<br/><br/>\r\n<b>Требуемые права токена</b><br/>`account-info`, `operation-upload`<br/><br/>\r\n<b>Типы перечислений</b><br/><br/>\r\n<b>Тип ТСП</b><br/>\r\n<table>\r\n<thead>\r\n<tr><th>Значение</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>QRPay</td><td>Стандартная точка продаж СБП</td></tr>\r\n<tr><td>InternetAcquiring</td><td>Интернет-эквайринг</td></tr>\r\n<tr><td>ModulKassa</td><td>МодульКасса</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\n<b>Статус регистрации ТСП</b><br/>\r\n<table>\r\n<thead>\r\n<tr><th>Значение</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>New</td><td>Новый запрос</td></tr>\r\n<tr><td>Processing</td><td>В обработке</td></tr>\r\n<tr><td>Registered</td><td>Зарегестрирован в СБП</td></tr>\r\n<tr><td>Rejected</td><td>Отклонен</td></tr>\r\n<tr><td>Blocked</td><td>Заблокирован (приостановка от фрод-мониторинга)</td></tr>\r\n<tr><td>Error</td><td>Ошибка при регистрации</td></tr>\r\n<tr><td>RejectedFBR</td><td>Отклонен фрод-мониторингом</td></tr>\r\n<tr><td>NotRegistered</td><td>Заявка не зарегистрирована, ожидает начала регистрации</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\n<b>Тип QR-кода</b><br/>\r\n<table>\r\n<thead>\r\n<tr><th>Значение</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>QRS</td><td>Статический (QR наклейка)</td></tr>\r\n<tr><td>QRD</td><td>Динамический (QR на кассе)</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\n<b>Статусы QR-кода</b><br/>\r\n<table>\r\n<thead>\r\n<tr><th>Значение</th><th>Описание</th></tr>\r\n</thead>\r\n<tbody>\r\n<tr><td>NotStarted</td><td>Операции по QR коду не существует</td></tr>\r\n<tr><td>Received</td><td>Операция в обработке</td></tr>\r\n<tr><td>InProgress</td><td>Операция в обработке</td></tr>\r\n<tr><td>Accepted</td><td>Операция завершена успешно</td></tr>\r\n<tr><td>Rejected</td><td>Операция отклонена</td></tr>\r\n<tr><td>TimedOut</td><td>Время ожидания операции превышено</td></tr>\r\n</tbody>\r\n</table><br/><br/>\r\n"
+    },
+    {
+      "name": "Номинальные счета",
+      "description": "Владелец номинального счета ежедневно не позднее 23:00 МСК отправляет данные\r\nбенефициарных владельцев (бенефициаров). Для этого используется публичное API Модульбанка. В массиве данных должна\r\nсодержаться информация обо всех бенефициарах, чьи деньги находятся на номинальном счете на момент отправки массива, а\r\nтакже о бенефициарах, по которым были движения средств за прошедшие сутки.\r\n<br/><br/>Система Модульбанка обрабатывает полученные данные, и на их основе формирует <b>Отчет о бенефициарных владельцах</b> на\r\nтекущую дату и <b>Анкеты бенефициарных владельцев</b> по форме, которая соответствует требованиям 115-ФЗ. Если клиент не\r\nприслал массив, то мы отправляем в его личный кабинет уведомление о том, что данные нужно отправить. <br/><br/>\r\nОтчет и Анкеты размещаются в личном кабинете Модульбанка владельца номинального счета. Туда же отправляется уведомление\r\nо необходимости подписания файлов.\r\n<br/><br/>Владелец номинального счета на следующий день после отправки массива подписывает Отчёт и Анкеты. Это делается\r\nили через личный кабинет или через API Модульбанка. В первом случае владелец входит в кабинет и подписывает Отчет\r\nпростой электронной подписью, а Анкеты - усиленной квалифицированной электронной подписью (УКЭП). Способ подписания\r\nчерез API описан ниже.\r\n<br/><br/>Подписанные отчет и анкеты сохраняются в системе Модульбанка.\r\n<br/><br/><b>Подписание Отчёта по бенефициарам через API</b>\r\n<br/><br/> Здесь и ниже: при получении ошибок попытайтесь выполнить рекомендации из сообщения об ошибке. Если это не\r\nпоможет - напишите в поддержку банка.\r\n<br/><br/>Есть два метода подписания отчетов по бенефициарам: v1 и v2.\r\n<br/>Метод v2 реализован позже и отличается тем, что сначала нужно получить и подписать PDF всех ранее неподписанных отчётов,\r\nа не только последнего. На текущий момент работают обе версии, но мы настоятельно <b>рекомендуем</b> использовать метод v2,\r\nтак как в скором времени v1 будет отключён.\r\n<br/><br/>Описание метода v1:\r\n<br/>1. По номеру номинального счёта получите PDF с последним отчётом о бенефициарах – метод \"Получить файл отчёта\".\r\n<br/>2. Полученный отчёт подпишите с помощью УКЭП и передайте в банк отсоединённую подпись в формате Base64 – метод \r\n\"Проверить и передать в банк подписанный отчёт\".\r\n<br/><br/>Описание метода v2:\r\n<br/>1. По номеру номинального счёта получите список всех ID отчетов, которые ранее не были подписаны \r\n– \"Метод получения информации о не подписанных отчетов\".\r\n<br/>2. По полученным ID с помощью \"Метода получения файла отчета\" получите PDF файлы отчетов. \r\n<br/>3. Полученные файлы подпишите с помощью УКЭП и передайте в банк отсоединённую подпись в формате Base64 – метод \"Проверить \r\nи передать в банк подписанный отчёт\". \r\n<br/><br/>Пример того, как можно подписать данные см. ниже.\r\n<br/><br/><b>Подписание Анкет бенефициаров через API</b>\r\n<br/><br/> 1. Методом \"Получить список анкет по бенефициарам\" получите id частей анкет (Guid). В случае, когда\r\nбенефициаров немного, каждая анкета будет иметь одну часть, но возможно и большее количество.\r\n<br/>2. Вызовите метод \"Получить файл с частью конкретной анкеты\" для получения zip-архива.\r\n<br/>3. Используйте метод \"Проверить и передать в банк подписанную часть анкеты\" для загрузки отсоединённой подписи в\r\nформате Base64. Пример того как можно подписать данные см. ниже.\r\n<br/><br/><b>Подписание строки и получение отсоединённой электронной подписи в формате Base64.</b>\r\n<br/><br/>Скачать приложение cryptcp от компании КриптоПро и выполнить запрос:\r\n<br/><br/><code>cryptcp.x64.exe -sign -f <путь к файлу хранилищу сертификатов ЭЦП> -dn\r\n \"<(при необходимости) строка для поиска сертификата, например ИНН компании>\" -detached\r\n -pin <пароль> <путь к подписываемому файлу></code>\r\n<br/><br/> Например:\r\n<br/><code>cryptcp.x64.exe -sign -f cert2.cer -dn \"7840473679\" -detached -pin password123\r\n test.txt</code>"
+    },
+    {
+      "name": "Вопросы-Ответы",
+      "description": "<b>Безопасно ли использование API, ведь с его помощью можно получить данные, чтобы воспользоваться деньгами клиентов?</b><br/>\r\nИнтеграции партнеров с Модульбанком безопасны и основаны на протоколе OAuth2, признанном во всем мире.<br/>\r\nПри подключении интеграции вы сами подтверждаете уровень доступа, для учетных систем это, как правило, account-info + operation-history. С таким уровнем доступа невозможно инициировать движение средств, даже если злоумышленник каким-то образом узнает токен доступа.<br/><br/>\r\n<b>Сколько стоит подключиться к АПИ?</b><br/>\r\nБесплатно. Подключение доступно на всех тарифах<br/><br/>\r\n<b>Как генерируются clientid и clientsecret?</b><br/>\r\nНужно написать запрос на почту api@modulbank.ru, наша служба поддержки сгенерирует ключи<br/><br/>\r\n<b>Есть ли у вас тестовые ключи для подключения api?</b><br/>\r\nЕсть режим \"песочница\", некоторые методы API можно протестировать в нем. Тестовых аккаунтов в продуктивной среде нет<br/><br/>\r\n<b>Меняется ли access token? Если два раза пройти аутентификацию, вернется один и тот же access token?</b><br/>\r\nТокен выдается на 3 года и не меняется в течение этого времени. Его можно отозвать по апи<br/><br/>\r\n<b>Возможна ли интеграция по API для Android и Ios приложений?</b><br/>\r\nДа, методы Public API можно вызывать из мобильных приложений<br/><br/>\r\n<b>Есть ли список хостов (IP или домены) для веб-хуков, с которых нужно разрешить принимать запросы в фаерволе?</b><br/>\r\n185.137.76.36<br/>\r\n185.137.76.37<br/>\r\n185.137.76.38<br/>\r\n185.137.76.39<br/><br/>\r\n<b>Куда нужно прописать адрес для исходящего веб-хука?</b><br/>\r\nАдрес вебхука прописывается в ЛК клиента Настройки -> Услуги -> API Банка -> Генерация токена авторизации<br/><br/>\r\n<b>Можно ли протестировать уведомления о произошедших транзакциях (веб-хуки) в режиме песочницы?</b><br/>\r\nТакой возможности нет<br/><br/>\r\n<b>Какие сообщения передаются в веб-хуках? Была операция, но веб-хук по ней не пришел</b><br/>\r\nМы отправляем веб-хуки для платежей в следующих статусах:<br/>\r\nDraft (Черновик), SendToBank (Ожидающая исполнения), Executed (Исполненная), RejectByBank (Отказано банком в исполнении), Canceled (Отменённая), Received (Исполненная), PayReceived (Исполненная (Оплачено)), ClarifyRequiredOutcome (Требует уточнения)<br/><br/>\r\n<b>Что делать, если не приходят/перестали приходить оповещения о платежах через веб-хуки?</b><br/>\r\n<ol><li>Проверить, не просрочен ли токен</li><br/>\r\n<li>Разрешить принимать запросы в фаерволе с адресов<br/>\r\n185.137.76.36<br/>\r\n185.137.76.37<br/>\r\n185.137.76.38<br/>\r\n185.137.76.39</li><br/>\r\n<li>Написать на почту api@modulbank.ru или в чат банка</li></ol><br/>\r\n<b>Какой часовой пояс указывается в полях \"Дата проведения платежа\", \"Дата создания транзакции\"?</b><br/>\r\nУказывается московское время<br/>"
+    }
+  ]
+}

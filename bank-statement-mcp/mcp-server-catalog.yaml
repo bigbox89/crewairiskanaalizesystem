@@ -1,0 +1,48 @@
+id: "bank-statement-mcp"
+name: "Универсальный банковский коннектор"
+description: |
+  Коробочный MCP-сервер для получения выписок из T‑Bank, Модульбанк, Альфа-Банк.
+  Пользователь вводит только свой токен — никаких логинов/паролей.
+tools:
+  - name: "get_bank_statement"
+    description: "Получить выписку за период"
+    parameters:
+      from_date: "string (YYYY-MM-DD) — дата начала"
+      to_date: "string (YYYY-MM-DD) — дата конца"
+      account_id: "string (опционально) — ID счёта"
+rawEnvs:
+  BANK_PROVIDER:
+    isRequired: true
+    description: "Банк: tbank|modulbank|alfa"
+  MODE:
+    isRequired: false
+    description: "Режим работы: prod | test"
+    defaultValue: "test"
+  HOST:
+    isRequired: false
+    description: "Адрес HTTP сервера"
+    defaultValue: "0.0.0.0"
+  PORT:
+    isRequired: false
+    description: "Порт HTTP сервера"
+    defaultValue: "8080"
+secretEnvs:
+  T_BANK_TOKEN:
+    isRequired: false
+    description: "Токен T‑Bank"
+  MODULBANK_TOKEN:
+    isRequired: false
+    description: "Токен Модульбанка"
+  ALFA_TOKEN:
+    isRequired: false
+    description: "Токен Альфа"
+image_uri: ${IMAGE_URI}
+tags: ["banking", "finance", "statements", "open-banking"]
+category: "Finance"
+versions: ["1.0.0"]
+exposed_ports:
+  - port: 8080
+    protocol: "HTTP"
+status: "MCP_SERVER_PREDEFINED_STATUS_AVAILABLE"
+type: "MCP_SERVER_PREDEFINED_TYPE_INTERNAL"
+

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  fns-tax-mcp:
+    build: .
+    container_name: fns-tax-mcp
+    environment:
+      - FNS_MODE=${FNS_MODE:-test}
+      - FNS_API_TOKEN=${FNS_API_TOKEN:-e8d5147b30c2d87db8ec61b5651f400d5da812b7}
+      - FNS_PROD_TOKEN=${FNS_PROD_TOKEN:-}
+      - FNS_CERT_PATH=${FNS_CERT_PATH:-/certs/cert.p12}
+      - FNS_CERT_PASSWORD=${FNS_CERT_PASSWORD:-}
+      - PORT=8080
+      - HOST=0.0.0.0
+    volumes:
+      # CHANGE: Монтирование директории с КЭП
+      # WHY: Пользователь должен предоставить свой файл КЭП
+      # REF: Требования для работы с КЭП
+      - ./certs:/certs:ro
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+

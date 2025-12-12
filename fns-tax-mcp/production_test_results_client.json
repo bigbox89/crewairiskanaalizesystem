@@ -1,0 +1,11 @@
+{
+  "list_tools": {
+    "status": "ok",
+    "tools_count": 24
+  },
+  "tool_call": {
+    "status": "ok",
+    "tool": "generate_usn_declaration",
+    "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Декларация УСН 6% за Q1 2025\\\\nИНН: 7707083893\\\\nДоходы: 1,000,000.00 ₽\\\\nРасходы: 0.00 ₽\\\\nНалог к уплате: 60,000.00 ₽\\\\nXML декларация сгенерирована по формату ФНС (КНД 1152017)\",\"annotations\":null,\"_meta\":nu"
+  }
+}

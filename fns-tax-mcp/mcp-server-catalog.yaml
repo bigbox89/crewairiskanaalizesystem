@@ -1,0 +1,84 @@
+id: "fns-tax-mcp"
+name: "ФНС: генерация деклараций и работа с API-ФНС"
+description: |
+  Коробочный MCP-сервер для автоматической генерации налоговых деклараций в формате XML,
+  а также работы с полным набором методов API-ФНС (api-fns.ru):
+  • Локальная генерация деклараций: УСН (6% и 15%), ОСНО, НДС, 6-НДФЛ (форматы ФНС)
+  • Поиск и получение данных о компаниях (ЕГРЮЛ/ЕГРИП)
+  • Проверка контрагентов и блокировок счетов
+  • Работа с физическими лицами (ИНН, паспорта, статусы)
+  • Получение выписок, отчетности и лицензий
+  Генерация деклараций соответствует форматам ФНС (КНД). Работает с api-fns.ru (тест/прод).
+tools:
+  # Генерация деклараций
+  - name: "generate_usn_declaration"
+    description: "Генерация декларации по УСН (КНД 1152017)"
+  - name: "generate_osno_declaration"
+    description: "Генерация декларации по ОСНО (КНД 1151001)"
+  - name: "generate_nds_declaration"
+    description: "Генерация декларации по НДС (КНД 1151001)"
+  - name: "generate_6ndfl_declaration"
+    description: "Генерация формы 6-НДФЛ (КНД 1151078)"
+  # Поиск и информация о компаниях
+  - name: "search_companies"
+    description: "Поиск компаний, ИП и физических лиц в ЕГРЮЛ/ЕГРИП"
+  - name: "autocomplete"
+    description: "Автодополнение для поиска компаний и ИП"
+  - name: "get_company_data"
+    description: "Получение всех актуальных и исторических данных о компании из ЕГРЮЛ/ЕГРИП"
+  - name: "multinfo_companies"
+    description: "Получение базовых данных сразу о нескольких компаниях (до 100)"
+  - name: "multcheck_companies"
+    description: "Базовая проверка группы компаний (до 100)"
+  # Проверка и аналитика
+  - name: "check_counterparty"
+    description: "Проверка контрагента на признаки недобросовестности"
+  - name: "check_account_blocks"
+    description: "Проверка блокировок счета компании"
+  - name: "check_account_blocks_file"
+    description: "Проверка блокировок счета в виде файла"
+  - name: "track_changes"
+    description: "Отслеживание изменений параметров компании в ЕГРЮЛ/ЕГРИП"
+  - name: "monitor_companies"
+    description: "Мониторинг изменений по списку компаний"
+  # Документы и отчетность
+  - name: "get_extract"
+    description: "Получение официальной выписки ФНС из ЕГРЮЛ или ЕГРИП"
+  - name: "get_msp_extract"
+    description: "Получение выписки из реестра МСП"
+  - name: "get_accounting_report"
+    description: "Получение бухгалтерской отчетности организации"
+  - name: "get_accounting_report_file"
+    description: "Получение бухгалтерской отчетности в виде файла"
+  # Работа с физическими лицами
+  - name: "get_inn_by_passport"
+    description: "Узнать ИНН физического лица по паспортным данным"
+  - name: "check_passport"
+    description: "Проверка паспорта на недействительность"
+  - name: "check_passport_info"
+    description: "Информация о паспорте с причиной недействительности"
+  - name: "check_person_status"
+    description: "Проверка статусов физического лица (самозанятый, ИП, банкрот)"
+  # Специализированные методы
+  - name: "get_fsrar_licenses"
+    description: "Получение лицензий ФСРАР для компании"
+  - name: "get_api_statistics"
+    description: "Получение статистики использования API ключа"
+rawEnvs:
+  FNS_MODE:
+    isRequired: true
+    description: "test | prod"
+secretEnvs:
+  FNS_API_TOKEN:
+    isRequired: true
+    description: "Токен api-fns.ru (для методов API-ФНС)"
+image_uri: ${IMAGE_URI}
+tags: ["fns", "tax", "declaration", "usn", "osno", "nds", "6ndfl", "nalog", "egrul", "egrip", "api-fns", "companies", "counterparty", "passport", "inn", "xml"]
+category: "Finance & Tax"
+versions: ["1.0.0"]
+exposed_ports:
+  - port: 8080
+    protocol: "HTTP"
+status: "MCP_SERVER_PREDEFINED_STATUS_AVAILABLE"
+type: "MCP_SERVER_PREDEFINED_TYPE_INTERNAL"
+

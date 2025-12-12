@@ -1,0 +1,128 @@
+{
+  "list_tools": {
+    "status": "ok",
+    "tools_count": 24
+  },
+  "tools": {
+    "generate_usn_declaration": {
+      "status": "ok",
+      "tool": "generate_usn_declaration",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Декларация УСН 6% за Q1 2025\\\\nИНН: 7707083893\\\\nДоходы: 1,000,000.00 ₽\\\\nРасходы: 0.00 ₽\\\\nНалог к уплате: 60"
+    },
+    "generate_osno_declaration": {
+      "status": "ok",
+      "tool": "generate_osno_declaration",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Декларация ОСНО за Q1 2025\\\\nИНН: 7707083893\\\\nДоходы: 2,000,000.00 ₽\\\\nРасходы: 500,000.00 ₽\\\\nПрибыль: 1,500"
+    },
+    "generate_nds_declaration": {
+      "status": "ok",
+      "tool": "generate_nds_declaration",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Декларация НДС за Q1 2025\\\\nИНН: 7707083893\\\\nОборот: 2,000,000.00 ₽\\\\nНДС к уплате: 200,000.00 ₽\\\\nНДС к возм"
+    },
+    "generate_6ndfl_declaration": {
+      "status": "ok",
+      "tool": "generate_6ndfl_declaration",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Форма 6-НДФЛ за Q1 2025\\\\nИНН: 7707083893\\\\nОбщая сумма доходов: 5,000,000.00 ₽\\\\nНачислено НДФЛ: 650,000.00 ₽"
+    },
+    "search_companies": {
+      "status": "ok",
+      "tool": "search_companies",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Найдено компаний: 2\\\\n\\\\nЮЛ: СРФСОО \\\\\"ФДСО\\\\\"\\\\nИНН: 6732133377, ОГРН: 1166733070492\\\\nСтатус: Действующее\\\\n"
+    },
+    "autocomplete": {
+      "status": "ok",
+      "tool": "autocomplete",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Найдено вариантов: 1\\\\n\\\\nЮЛ: ОАО \\\\\"ТМ1\\\\\"\\\\nИНН: 7707083893, ОГРН: 1027700132195\",\"annotations\":null,\"_meta\""
+    },
+    "get_company_data": {
+      "status": "ok",
+      "tool": "get_company_data",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Данные о компании:\\\\n\\\\nНаименование: ОБЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ \\\\\"ДАЛЬЧЕРМЕТ\\\\\"\\\\nКраткое: ООО"
+    },
+    "multinfo_companies": {
+      "status": "ok",
+      "tool": "multinfo_companies",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Найдено компаний: 2\\\\n\\\\nЮЛ: ООО \\\\\"Компания 1\\\\\"\\\\nИНН: 308661702400048, ОГРН: 308661702400048\\\\nСтатус: Дейс"
+    },
+    "multcheck_companies": {
+      "status": "ok",
+      "tool": "multcheck_companies",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Найдено проблемных компаний: 1\\\\n\\\\n⚠️ ЮЛ: ООО \\\\\"Проблемная\\\\\"\\\\nИНН: 1047796296910, ОГРН: 1047796296910\\\\nСт"
+    },
+    "check_counterparty": {
+      "status": "ok",
+      "tool": "check_counterparty",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Результаты проверки контрагента:\\\\n\\\\nИНН: 1027739471517, ОГРН: 1027739471517\\\\n\\\\n✅ Позитивные факторы:\\\\n  -"
+    },
+    "check_account_blocks": {
+      "status": "ok",
+      "tool": "check_account_blocks",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Проверка блокировок счета для ИНН: 7707083893\\\\n\\\\n✅ Блокировок счетов не найдено\",\"annotations\":null,\"_meta\":"
+    },
+    "check_account_blocks_file": {
+      "status": "ok",
+      "tool": "check_account_blocks_file",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Файл блокировок счета для ИНН: 7707083893\\\\nФормат: ZIP (содержит PDF и подпись SIG)\\\\nРазмер: тестовый файл\","
+    },
+    "track_changes": {
+      "status": "ok",
+      "tool": "track_changes",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Изменения для компании:\\\\n\\\\nИНН: 1076671015431, ОГРН: 1076671015431\\\\n\\\\nИстория изменений:\\\\n  - 2018-01-25:"
+    },
+    "monitor_companies": {
+      "status": "ok",
+      "tool": "monitor_companies",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Список компаний на мониторинге: 1\\\\n\\\\nОГРН: 1076671015431, ИНН: 1076671015431\",\"annotations\":null,\"_meta\":nul"
+    },
+    "get_extract": {
+      "status": "ok",
+      "tool": "get_extract",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Выписка из ЕГРЮЛ/ЕГРИП для: 7707083893\\\\nФормат: PDF (заверен подписью ФНС)\\\\nРазмер: тестовый файл\",\"annotati"
+    },
+    "get_msp_extract": {
+      "status": "ok",
+      "tool": "get_msp_extract",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Выписка МСП для: 7707083893\\\\nТип: report\\\\nФормат: PDF\\\\nРазмер: тестовый файл\",\"annotations\":null,\"_meta\":nu"
+    },
+    "get_accounting_report": {
+      "status": "ok",
+      "tool": "get_accounting_report",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Бухгалтерская отчетность для: 7707083893\\\\n\\\\nИНН/ОГРН: 7605016030\\\\n\\\\nГод: 2019\\\\n  Строка 1230: 1000000 тыс"
+    },
+    "get_accounting_report_file": {
+      "status": "ok",
+      "tool": "get_accounting_report_file",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Бухгалтерская отчетность для: 7707083893\\\\nГод: 2023\\\\nФормат: PDF\\\\nРазмер: тестовый файл\",\"annotations\":null"
+    },
+    "get_inn_by_passport": {
+      "status": "ok",
+      "tool": "get_inn_by_passport",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"ИНН найден:\\\\n\\\\nФИО: Иванов Иван Иванович\\\\nДата рождения: 01.01.1990\\\\nДокумент: 1234 567890\\\\nИНН: 77320897"
+    },
+    "check_passport": {
+      "status": "ok",
+      "tool": "check_passport",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Проверка паспорта: 1234 567890\\\\n\\\\nРезультат: Cреди недействительных не значится\",\"annotations\":null,\"_meta\":"
+    },
+    "check_passport_info": {
+      "status": "ok",
+      "tool": "check_passport_info",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Проверка паспорта: 1234 567890\\\\n\\\\nРезультат: Cреди недействительных не значится\",\"annotations\":null,\"_meta\":"
+    },
+    "check_person_status": {
+      "status": "ok",
+      "tool": "check_person_status",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Статусы для ИНН: 123456789012\\\\n\\\\nКорректность ИНН:\\\\n  Контрольная сумма: True\\\\n  Недействительный: False\\\\"
+    },
+    "get_fsrar_licenses": {
+      "status": "ok",
+      "tool": "get_fsrar_licenses",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Лицензии ФСРАР для ИНН: 7707083893\\\\n\\\\nНомер лицензии: FSRAR-12345\\\\nВид лицензии: Розничная продажа алкоголя"
+    },
+    "get_api_statistics": {
+      "status": "ok",
+      "tool": "get_api_statistics",
+      "result": "CallToolResult(content=[TextContent(type='text', text='{\"content\":[{\"type\":\"text\",\"text\":\"Статистика использования API:\\\\n\\\\nПериод: 2025-01-01 - 2025-12-31\\\\nСтатус: FREE\\\\n\\\\nМетоды:\\\\n  search: исп"
+    }
+  }
+}
