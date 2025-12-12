@@ -8,6 +8,7 @@
 
 - [Описание системы](#описание-системы)
 - [URL (агенты и MCP)](#url-агенты-и-mcp)
+- [Живое демо (Web UI)](#живое-демо-web-ui)
 - [Подключенные API](#подключенные-api)
 - [Как развернуть в Cloud.ru (админам)](#как-развернуть-в-cloudru-админам)
 - [Сервисы в Cloud.ru (MCP-серверы)](#сервисы-в-cloudru-mcp-серверы)
@@ -54,6 +55,12 @@
 | MCP server | mcp-server-kad-arbitr | https://67e0acea-15bf-4034-9cd6-5f4940ff97e9-mcp-server.ai-agent.inference.cloud.ru/mcp |
 | MCP server | mcp-server-fns | https://dc41f1b0-0a90-4834-90e1-7269d92aa1e4-mcp-server.ai-agent.inference.cloud.ru/mcp |
 | MCP server | mcp-server-bank-statement | https://df98ce3e-e263-4c9a-a73e-d3527e5a4124-mcp-server.ai-agent.inference.cloud.ru/mcp |
+
+---
+
+## Живое демо (Web UI)
+
+- **Web UI**: [http://176.109.106.231:8080/](http://176.109.106.231:8080/)
 
 ---
 
